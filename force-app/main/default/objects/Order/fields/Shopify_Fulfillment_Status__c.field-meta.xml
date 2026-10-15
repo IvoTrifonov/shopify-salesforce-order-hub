@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Shopify_Fulfillment_Status__c</fullName>
+    <inlineHelpText>Shopify fulfillment_status. Value API names match Shopify's tokens; a null status maps to unfulfilled.</inlineHelpText>
     <label>Shopify Fulfillment Status</label>
     <required>false</required>
     <trackHistory>false</trackHistory>
@@ -10,22 +11,22 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>Unfulfilled</fullName>
+                <fullName>unfulfilled</fullName>
                 <default>false</default>
                 <label>Unfulfilled</label>
             </value>
             <value>
-                <fullName>Fulfilled</fullName>
-                <default>false</default>
-                <label>Fulfilled</label>
-            </value>
-            <value>
-                <fullName>Partially Fulfilled</fullName>
+                <fullName>partial</fullName>
                 <default>false</default>
                 <label>Partially Fulfilled</label>
             </value>
             <value>
-                <fullName>Restocked</fullName>
+                <fullName>fulfilled</fullName>
+                <default>false</default>
+                <label>Fulfilled</label>
+            </value>
+            <value>
+                <fullName>restocked</fullName>
                 <default>false</default>
                 <label>Restocked</label>
             </value>

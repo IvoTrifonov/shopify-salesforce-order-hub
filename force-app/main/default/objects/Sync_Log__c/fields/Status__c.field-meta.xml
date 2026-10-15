@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Status__c</fullName>
+    <inlineHelpText>Skipped: the event was ignored because Salesforce already holds a newer version of the record.</inlineHelpText>
     <label>Status</label>
     <required>true</required>
     <trackTrending>false</trackTrending>
@@ -23,6 +24,11 @@
                 <fullName>Retrying</fullName>
                 <default>false</default>
                 <label>Retrying</label>
+            </value>
+            <value>
+                <fullName>Skipped</fullName>
+                <default>false</default>
+                <label>Skipped</label>
             </value>
         </valueSetDefinition>
     </valueSet>

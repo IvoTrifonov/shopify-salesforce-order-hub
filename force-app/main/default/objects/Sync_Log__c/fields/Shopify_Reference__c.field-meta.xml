@@ -2,9 +2,10 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Shopify_Reference__c</fullName>
     <externalId>false</externalId>
+    <inlineHelpText>Shopify ID of the record the sync concerns, e.g. the order ID. Empty when the payload could not be parsed.</inlineHelpText>
     <label>Shopify Reference</label>
     <length>30</length>
-    <required>true</required>
+    <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Text</type>
     <unique>false</unique>

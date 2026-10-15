@@ -5,7 +5,7 @@
       "default": true
     }
   ],
-  "name": "tmp-scaffold",
+  "name": "shopify-salesforce-order-hub",
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "67.0"

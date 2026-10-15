@@ -52,12 +52,17 @@ records.
 
 | Object | Purpose | Key fields |
 |---|---|---|
-| `Order` (standard) | Shopify order header | `Shopify_Order_Id__c` (external ID), `Financial_Status__c`, `Shopify_Fulfillment_Status__c`, `Shopify_Total_Price__c`, `Customer_Email__c`, `Shopify_Updated_At__c` |
+| `Order` (standard) | Shopify order header | `Shopify_Order_Id__c` (external ID), `Shopify_Order_Name__c`, `Financial_Status__c`, `Shopify_Fulfillment_Status__c`, `Shopify_Total_Price__c`, `Customer_Email__c`, `Shopify_Updated_At__c` |
 | `OrderItem` (standard) | Order line | `Shopify_Line_Item_Id__c` (external ID), `Variant_Title__c` |
 | `Product2` (standard) | Product variant | `Shopify_Product_Id__c`, `Shopify_Variant_Id__c` (external ID) |
-| `Invoice__c` | Invoice generated from an order | `Order__c` |
-| `Sync_Log__c` | Audit trail of every inbound/outbound sync | `Direction__c`, `Status__c`, `Event_Topic__c`, `HTTP_Status_Code__c`, `Retry_Count__c`, `Payload__c`, `Error_Message__c` |
-| `Order_Status_Changed__e` | Platform Event driving outbound sync | — |
+| `Invoice__c` | Invoice generated from an order | `Order__c`, `Status__c`, `Invoice_Date__c`, `Due_Date__c`, `Total_Amount__c` |
+| `Sync_Log__c` | Audit trail of every inbound/outbound sync | `Direction__c`, `Status__c`, `Event_Topic__c`, `Shopify_Reference__c`, `HTTP_Status_Code__c`, `Retry_Count__c`, `Payload__c`, `Error_Message__c`, `Order__c` |
+| `Order_Status_Changed__e` | Platform Event driving outbound sync (published after commit) | `Order_Id__c`, `Shopify_Order_Id__c`, `Previous_Status__c`, `New_Status__c` |
+
+Shopify status picklists use Shopify's own tokens as value API names (e.g.
+`partially_paid`). Access is granted through the `Order_Hub_Admin` permission
+set. See [ADR 0001](docs/decisions/0001-standard-order-objects.md) for the
+reasoning behind the model.
 
 ## Engineering standards
 
@@ -82,7 +87,7 @@ top of that working path.
 **Milestone 1: end-to-end slice**
 
 - [x] SFDX project scaffold
-- [ ] Data model (standard `Order` / `OrderItem` / `Product2` + `Invoice__c`, `Sync_Log__c`)
+- [x] Data model (standard `Order` / `OrderItem` / `Product2` + `Invoice__c`, `Sync_Log__c`)
 - [ ] Trigger framework
 - [ ] Inbound webhook endpoint with HMAC verification (`orders/create`)
 - [ ] CI/CD pipeline (deploy validation + Apex tests on every PR)

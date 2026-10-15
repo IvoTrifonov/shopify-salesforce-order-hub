@@ -5,7 +5,7 @@
     <externalId>true</externalId>
     <label>Shopify Variant Id</label>
     <length>30</length>
-    <required>true</required>
+    <required>false</required>
     <trackHistory>false</trackHistory>
     <type>Text</type>
     <unique>true</unique>
