@@ -1,0 +1,386 @@
+{
+  "id": 17345318027345,
+  "admin_graphql_api_id": "gid://shopify/Order/17345318027345",
+  "app_id": 580111,
+  "browser_ip": "203.0.113.10",
+  "buyer_accepts_marketing": false,
+  "cancel_reason": null,
+  "cancelled_at": null,
+  "cart_token": null,
+  "checkout_token": "0000",
+  "client_details": {
+    "accept_language": "en-US",
+    "browser_height": null,
+    "browser_ip": "203.0.113.10",
+    "browser_width": null,
+    "session_hash": null,
+    "user_agent": "Mozilla/5.0"
+  },
+  "closed_at": null,
+  "company": null,
+  "confirmation_number": "TESTCONF1",
+  "confirmed": true,
+  "contact_email": "jane.doe@example.com",
+  "created_at": "2026-10-28T12:56:51-04:00",
+  "currency": "USD",
+  "current_shipping_price_set": {
+    "shop_money": {
+      "amount": "8.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "8.00",
+      "currency_code": "USD"
+    }
+  },
+  "current_subtotal_price": "19.99",
+  "current_subtotal_price_set": {
+    "shop_money": {
+      "amount": "19.99",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "19.99",
+      "currency_code": "USD"
+    }
+  },
+  "current_total_additional_fees_set": null,
+  "current_total_discounts": "0.00",
+  "current_total_discounts_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "current_total_duties_set": null,
+  "current_total_price": "27.99",
+  "current_total_price_set": {
+    "shop_money": {
+      "amount": "27.99",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "27.99",
+      "currency_code": "USD"
+    }
+  },
+  "current_total_tax": "0.00",
+  "current_total_tax_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "customer_locale": "en-US",
+  "device_id": null,
+  "discount_codes": [],
+  "duties_included": false,
+  "email": "jane.doe@example.com",
+  "estimated_taxes": false,
+  "financial_status": "paid",
+  "fulfillment_status": null,
+  "landing_site": null,
+  "landing_site_ref": null,
+  "location_id": null,
+  "merchant_business_entity_id": "39393820753",
+  "merchant_of_record_app_id": null,
+  "name": "#1002",
+  "note": null,
+  "note_attributes": [],
+  "number": 2,
+  "order_number": 1002,
+  "order_status_url": "https://example.com/orders/0000/authenticate?key=0000",
+  "original_total_additional_fees_set": null,
+  "original_total_duties_set": null,
+  "payment_gateway_names": [
+    "bogus"
+  ],
+  "phone": null,
+  "po_number": null,
+  "presentment_currency": "USD",
+  "processed_at": "2026-10-28T12:56:50-04:00",
+  "reference": null,
+  "referring_site": null,
+  "source_identifier": null,
+  "source_name": "web",
+  "source_url": null,
+  "subtotal_price": "19.99",
+  "subtotal_price_set": {
+    "shop_money": {
+      "amount": "19.99",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "19.99",
+      "currency_code": "USD"
+    }
+  },
+  "tags": "",
+  "tax_exempt": false,
+  "tax_lines": [],
+  "taxes_included": false,
+  "test": true,
+  "token": "0000",
+  "total_cash_rounding_payment_adjustment_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_cash_rounding_refund_adjustment_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_discounts": "0.00",
+  "total_discounts_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_line_items_price": "19.99",
+  "total_line_items_price_set": {
+    "shop_money": {
+      "amount": "19.99",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "19.99",
+      "currency_code": "USD"
+    }
+  },
+  "total_outstanding": "0.00",
+  "total_price": "27.99",
+  "total_price_set": {
+    "shop_money": {
+      "amount": "27.99",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "27.99",
+      "currency_code": "USD"
+    }
+  },
+  "total_shipping_price_set": {
+    "shop_money": {
+      "amount": "8.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "8.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_tax": "0.00",
+  "total_tax_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_tip_received": "0.00",
+  "total_weight": 150,
+  "updated_at": "2026-10-28T12:56:52-04:00",
+  "user_id": null,
+  "billing_address": {
+    "first_name": "Jane",
+    "address1": "123 Main St",
+    "phone": "+15555550100",
+    "city": "Springfield",
+    "zip": "62701",
+    "province": "Illinois",
+    "country": "United States",
+    "last_name": "Doe",
+    "address2": null,
+    "company": null,
+    "latitude": null,
+    "longitude": null,
+    "name": "Jane Doe",
+    "country_code": "US",
+    "province_code": "IL"
+  },
+  "customer": {
+    "id": 25770218717265,
+    "created_at": "2026-07-20T09:24:04-04:00",
+    "updated_at": "2026-10-28T12:56:52-04:00",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "state": "disabled",
+    "note": null,
+    "verified_email": true,
+    "multipass_identifier": null,
+    "tax_exempt": false,
+    "email": "jane.doe@example.com",
+    "phone": null,
+    "currency": "USD",
+    "tax_exemptions": [],
+    "admin_graphql_api_id": "gid://shopify/Customer/25770218717265",
+    "default_address": {
+      "id": 36384348831825,
+      "customer_id": 25770218717265,
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "company": null,
+      "address1": "123 Main St",
+      "address2": null,
+      "city": "Springfield",
+      "province": "Illinois",
+      "country": "United States",
+      "zip": "62701",
+      "phone": null,
+      "name": "Jane Doe",
+      "province_code": "IL",
+      "country_code": "US",
+      "country_name": "United States",
+      "default": true
+    }
+  },
+  "discount_applications": [],
+  "fulfillments": [],
+  "line_items": [
+    {
+      "id": 46479812362321,
+      "admin_graphql_api_id": "gid://shopify/LineItem/46479812362321",
+      "attributed_staffs": [],
+      "current_quantity": 1,
+      "fulfillable_quantity": 1,
+      "fulfillment_service": "manual",
+      "fulfillment_status": null,
+      "gift_card": false,
+      "grams": 150,
+      "name": "Physical Product “The Band” T-Shirt - Small / green",
+      "price": "19.99",
+      "price_set": {
+        "shop_money": {
+          "amount": "19.99",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "19.99",
+          "currency_code": "USD"
+        }
+      },
+      "product_exists": true,
+      "product_id": 15915810324561,
+      "properties": [],
+      "quantity": 1,
+      "requires_shipping": true,
+      "sales_line_item_group_id": null,
+      "selling_plan_id": null,
+      "sku": "TheBandTShirt-SG",
+      "taxable": true,
+      "title": "Physical Product “The Band” T-Shirt",
+      "total_discount": "0.00",
+      "total_discount_set": {
+        "shop_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        }
+      },
+      "variant_id": 59824585736273,
+      "variant_inventory_management": "shopify",
+      "variant_title": "Small / green",
+      "vendor": "Harmony Threads",
+      "tax_lines": [],
+      "duties": [],
+      "discount_allocations": []
+    }
+  ],
+  "payment_terms": null,
+  "refunds": [],
+  "shipping_address": {
+    "first_name": "Jane",
+    "address1": "123 Main St",
+    "phone": "+15555550100",
+    "city": "Springfield",
+    "zip": "62701",
+    "province": "Illinois",
+    "country": "United States",
+    "last_name": "Doe",
+    "address2": null,
+    "company": null,
+    "latitude": null,
+    "longitude": null,
+    "name": "Jane Doe",
+    "country_code": "US",
+    "province_code": "IL"
+  },
+  "shipping_lines": [
+    {
+      "id": 16590633664593,
+      "carrier_identifier": null,
+      "code": "Standard",
+      "current_discounted_price_set": {
+        "shop_money": {
+          "amount": "8.00",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "8.00",
+          "currency_code": "USD"
+        }
+      },
+      "discounted_price": "8.00",
+      "discounted_price_set": {
+        "shop_money": {
+          "amount": "8.00",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "8.00",
+          "currency_code": "USD"
+        }
+      },
+      "is_removed": false,
+      "phone": null,
+      "price": "8.00",
+      "price_set": {
+        "shop_money": {
+          "amount": "8.00",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "8.00",
+          "currency_code": "USD"
+        }
+      },
+      "requested_fulfillment_service_id": null,
+      "source": "shopify",
+      "title": "Standard",
+      "tax_lines": [],
+      "discount_allocations": []
+    }
+  ],
+  "returns": [],
+  "line_item_groups": []
+}

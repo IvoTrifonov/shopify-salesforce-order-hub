@@ -44,9 +44,10 @@ list with one-click retry, and a duplicate-review component.
 
 **Configuration.** Runtime settings (retry limits, API version, feature
 toggles) live in Custom Metadata Types, so behaviour can change without a
-code deployment. Secrets such as the webhook signing key and the Admin API
-token are kept in Named / External Credentials, never in code or metadata
-records.
+code deployment. Secrets are never stored in source control: the Admin API
+token lives in a Named / External Credential, and the webhook signing key,
+which Apex must read to compute the HMAC, lives in the protected
+`Shopify_Settings__c` hierarchy custom setting, entered in Setup.
 
 ## Data model
 
