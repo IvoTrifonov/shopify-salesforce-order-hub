@@ -17,13 +17,56 @@ on the core platform.
 
 **Inbound (Shopify → Salesforce).** Shopify webhooks (`orders/create`,
 `orders/updated`, `refunds/create`) call a public Apex REST endpoint exposed
-through a Salesforce Site. The endpoint verifies the
-`X-Shopify-Hmac-Sha256` signature, parses the payload and upserts records
-using the Shopify order ID as an external ID, making the operation
-idempotent. Out-of-order deliveries are ignored by comparing the payload's
-`updated_at` with `Order.Shopify_Updated_At__c`. A trigger framework (one
-trigger per object, handler pattern) creates invoices, links or creates
-Accounts/Contacts by customer email, and writes a sync log entry.
+through a Salesforce Site. The endpoint only verifies the
+`X-Shopify-Hmac-Sha256` signature, stores the payload in `Sync_Log__c`,
+publishes a `Shopify_Webhook__e` Platform Event and responds immediately.
+The event's subscriber processes the payload outside the Site guest user
+context: it links or creates the customer's Account and Contact by email,
+creates products and price book entries per variant, and upserts the Order
+and its lines using Shopify IDs as external IDs, making the operation
+idempotent. Shipping is stored as an order line so `Order.TotalAmount`
+matches Shopify's total. Out-of-order deliveries are ignored by comparing the
+payload's `updated_at` with `Order.Shopify_Updated_At__c`. A trigger
+framework (one trigger per object, handler pattern) creates invoices.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant S as Shopify
+    box Transaction 1 · Site guest user
+        participant R as ShopifyWebhookResource
+    end
+    participant L as Sync_Log__c
+    participant B as Event bus
+    box Transaction 2 · Automated Process user
+        participant P as ShopifyWebhookProcessor
+        participant O as ShopifyOrderService
+    end
+
+    S->>R: POST orders/create (JSON + X-Shopify-Hmac-Sha256)
+    R->>R: Verify HMAC signature
+    alt invalid or missing signature
+        R->>L: Insert Error log (payload not stored)
+        R-->>S: 401
+    else valid signature
+        R->>L: Insert Pending log with payload
+        R->>B: Publish Shopify_Webhook__e (Sync_Log_Id__c)
+        R-->>S: 200
+        Note over R,B: Event is published only after transaction 1 commits
+        B->>P: ShopifyWebhookEventTrigger (after insert, up to 20 events)
+        P->>L: Read Pending logs and parse payloads
+        P->>O: upsertOrders(orders)
+        O->>O: Account + Contact (matched by email)
+        O->>O: Product2 + PricebookEntry per variant
+        O->>O: Order + OrderItems (incl. shipping line)
+        O-->>P: Order Ids by Shopify order ID
+        P->>L: Mark Success (linked to Order) or Error (with reason)
+    end
+```
+
+If the bulk upsert fails, the processor rolls it back and retries each order
+on its own, so one bad payload only fails its own log. A failed order can be
+reprocessed from its log, which keeps the original payload.
 
 **Outbound (Salesforce → Shopify).** When an order status changes in
 Salesforce, the Order trigger publishes an `Order_Status_Changed__e`
@@ -58,12 +101,15 @@ which Apex must read to compute the HMAC, lives in the protected
 | `Product2` (standard) | Product variant | `Shopify_Product_Id__c`, `Shopify_Variant_Id__c` (external ID) |
 | `Invoice__c` | Invoice generated from an order | `Order__c`, `Status__c`, `Invoice_Date__c`, `Due_Date__c`, `Total_Amount__c` |
 | `Sync_Log__c` | Audit trail of every inbound/outbound sync | `Direction__c`, `Status__c`, `Event_Topic__c`, `Shopify_Reference__c`, `HTTP_Status_Code__c`, `Retry_Count__c`, `Payload__c`, `Error_Message__c`, `Order__c` |
+| `Shopify_Webhook__e` | Platform Event handing verified webhooks to the processor (published after commit) | `Sync_Log_Id__c`, `Topic__c` |
+| `Shopify_Settings__c` | Protected hierarchy custom setting | `Webhook_Secret__c` |
 | `Order_Status_Changed__e` | Platform Event driving outbound sync (published after commit) | `Order_Id__c`, `Shopify_Order_Id__c`, `Previous_Status__c`, `New_Status__c` |
 
 Shopify status picklists use Shopify's own tokens as value API names (e.g.
 `partially_paid`). Access is granted through the `Order_Hub_Admin` permission
 set. See [ADR 0001](docs/decisions/0001-standard-order-objects.md) for the
-reasoning behind the model.
+reasoning behind the model and [ADR 0002](docs/decisions/0002-asynchronous-webhook-processing.md)
+for how webhooks are processed.
 
 ## Engineering standards
 
@@ -90,7 +136,7 @@ top of that working path.
 - [x] SFDX project scaffold
 - [x] Data model (standard `Order` / `OrderItem` / `Product2` + `Invoice__c`, `Sync_Log__c`)
 - [ ] Trigger framework
-- [ ] Inbound webhook endpoint with HMAC verification (`orders/create`)
+- [x] Inbound webhook endpoint with HMAC verification (`orders/create`)
 - [ ] CI/CD pipeline (deploy validation + Apex tests on every PR)
 
 **Milestone 2: full sync**
@@ -117,7 +163,6 @@ Lightning Web Components · SFDX · GitHub Actions CI/CD
 ## Project structure
 
 - `force-app/main/default/` — metadata source (classes, triggers, objects, LWC)
-- `manifest/` — `package.xml` deployment manifest
 - `config/` — scratch org definitions
 - `scripts/` — automation scripts
 - `docs/` — design decisions and architecture documentation
@@ -130,9 +175,9 @@ Common commands:
 | Command | Purpose |
 |---|---|
 | `sf org login web` | Authorize an org |
-| `sf project deploy start` | Deploy metadata to the org |
-| `sf project retrieve start` | Retrieve metadata from the org |
-| `sf apex run test` | Run Apex tests |
+| `sf project deploy start --source-dir force-app` | Deploy all metadata to the org |
+| `sf project retrieve start --metadata <type>:<name>` | Retrieve metadata from the org |
+| `sf apex run test --test-level RunLocalTests` | Run Apex tests |
 | `sf org open` | Open the org in a browser |
 
 ## License

@@ -1,6 +1,10 @@
 /**
  * Public endpoint for Shopify webhooks, exposed to Shopify through a Salesforce Site.
  *
+ * The endpoint only verifies, stores and acknowledges. Verified payloads are
+ * stored in Sync_Log__c and processed by ShopifyWebhookProcessor via the
+ * Shopify_Webhook__e Platform Event, outside the Site guest user context.
+ *
  * Runs `without sharing` because the caller is the Site guest user, who has no
  * access to Sync_Log__c records. Every request is authenticated by its HMAC
  * signature before any payload is stored.
@@ -49,7 +53,30 @@ global without sharing class ShopifyWebhookResource {
 
         String body = request.requestBody.toString();
         response.statusCode = 200;
-        insertLog(topic, extractShopifyId(body), 'Success', response.statusCode, body.left(PAYLOAD_MAX_LENGTH), null);
+        if (!ShopifyWebhookProcessor.HANDLED_TOPICS.contains(topic)) {
+            String reason = 'No handler for topic ' + topic + '.';
+            insertLog(topic, extractShopifyId(body), 'Skipped', response.statusCode, body.left(PAYLOAD_MAX_LENGTH), reason);
+            return;
+        }
+        Sync_Log__c log = insertLog(
+            topic,
+            extractShopifyId(body),
+            'Pending',
+            response.statusCode,
+            body.left(PAYLOAD_MAX_LENGTH),
+            null
+        );
+        publish(new Shopify_Webhook__e(Sync_Log_Id__c = log.Id, Topic__c = topic));
+    }
+
+    private static void publish(Shopify_Webhook__e event) {
+        Database.SaveResult result = EventBus.publish(event);
+        if (!result.isSuccess()) {
+            throw new EventBusException('Could not publish Shopify_Webhook__e: ' + result.getErrors()[0].getMessage());
+        }
+    }
+
+    public class EventBusException extends Exception {
     }
 
     // Logs only the error: the request data that caused it could make this insert fail as well
@@ -82,7 +109,7 @@ global without sharing class ShopifyWebhookResource {
         }
     }
 
-    private static void insertLog(
+    private static Sync_Log__c insertLog(
         String topic,
         String shopifyReference,
         String status,
@@ -90,7 +117,7 @@ global without sharing class ShopifyWebhookResource {
         String payload,
         String errorMessage
     ) {
-        insert new Sync_Log__c(
+        Sync_Log__c log = new Sync_Log__c(
             Direction__c = 'Inbound',
             Event_Topic__c = topic,
             Shopify_Reference__c = shopifyReference,
@@ -99,5 +126,7 @@ global without sharing class ShopifyWebhookResource {
             Payload__c = payload,
             Error_Message__c = errorMessage
         );
+        insert log;
+        return log;
     }
 }

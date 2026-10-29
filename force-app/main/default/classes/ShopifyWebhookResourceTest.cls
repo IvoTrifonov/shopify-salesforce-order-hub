@@ -9,13 +9,13 @@ private class ShopifyWebhookResourceTest {
     }
 
     @IsTest
-    static void logsPayloadOfValidWebhook() {
+    static void storesValidWebhookAsPending() {
         RestResponse response = post(ORDER_PAYLOAD, sign(ORDER_PAYLOAD));
 
         Assert.areEqual(200, response.statusCode);
         Sync_Log__c log = getOnlyLog();
         Assert.areEqual('Inbound', log.Direction__c);
-        Assert.areEqual('Success', log.Status__c);
+        Assert.areEqual('Pending', log.Status__c);
         Assert.areEqual('orders/create', log.Event_Topic__c);
         Assert.areEqual('820982911946154508', log.Shopify_Reference__c);
         Assert.areEqual(200, log.HTTP_Status_Code__c);
@@ -65,7 +65,7 @@ private class ShopifyWebhookResourceTest {
 
         Assert.areEqual(200, response.statusCode);
         Sync_Log__c log = getOnlyLog();
-        Assert.areEqual('Success', log.Status__c);
+        Assert.areEqual('Pending', log.Status__c);
         Assert.isNull(log.Shopify_Reference__c);
         Assert.areEqual(body, log.Payload__c);
     }
@@ -78,6 +78,32 @@ private class ShopifyWebhookResourceTest {
 
         Assert.areEqual(200, response.statusCode);
         Assert.isNull(getOnlyLog().Shopify_Reference__c);
+    }
+
+    @IsTest
+    static void skipsTopicWithoutHandler() {
+        RestResponse response = post(ORDER_PAYLOAD, sign(ORDER_PAYLOAD), 'products/update');
+
+        Assert.areEqual(200, response.statusCode, 'Shopify must not retry topics we ignore');
+        Sync_Log__c log = getOnlyLog();
+        Assert.areEqual('Skipped', log.Status__c);
+        Assert.isTrue(log.Error_Message__c.contains('products/update'), log.Error_Message__c);
+    }
+
+    @IsTest
+    static void createsOrderFromVerifiedWebhook() {
+        ShopifyTestData.activateStandardPricebook();
+        String payload = ShopifyTestData.orderPayload();
+
+        Test.startTest();
+        RestResponse response = post(payload, sign(payload));
+        Test.stopTest(); // delivers the Shopify_Webhook__e event to its subscriber
+
+        Assert.areEqual(200, response.statusCode);
+        Sync_Log__c log = [SELECT Status__c, Order__r.Shopify_Order_Id__c, Order__r.TotalAmount FROM Sync_Log__c];
+        Assert.areEqual('Success', log.Status__c);
+        Assert.areEqual(ShopifyTestData.FIXTURE_ORDER_ID, log.Order__r.Shopify_Order_Id__c);
+        Assert.areEqual(ShopifyTestData.FIXTURE_TOTAL, log.Order__r.TotalAmount);
     }
 
     @IsTest
@@ -120,9 +146,8 @@ private class ShopifyWebhookResourceTest {
         }
         RestContext.response = new RestResponse();
 
-        Test.startTest();
+        // Published events are only delivered at Test.stopTest(), so the log stays as the endpoint left it
         ShopifyWebhookResource.receive();
-        Test.stopTest();
 
         return RestContext.response;
     }

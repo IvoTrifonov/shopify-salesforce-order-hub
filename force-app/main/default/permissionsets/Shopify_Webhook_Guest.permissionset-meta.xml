@@ -4,7 +4,7 @@
         <apexClass>ShopifyWebhookResource</apexClass>
         <enabled>true</enabled>
     </classAccesses>
-    <description>Assigned to the Shopify webhook Site guest user. Grants the webhook endpoint class and creation of Sync_Log__c records only.</description>
+    <description>Assigned to the Shopify webhook Site guest user. Grants the webhook endpoint class and creation of Sync_Log__c records and Shopify_Webhook__e events only.</description>
     <fieldPermissions>
         <editable>true</editable>
         <field>Sync_Log__c.Error_Message__c</field>
@@ -39,6 +39,15 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Sync_Log__c</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Shopify_Webhook__e</object>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
 </PermissionSet>

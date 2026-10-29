@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Status__c</fullName>
-    <inlineHelpText>Skipped: the event was ignored because Salesforce already holds a newer version of the record.</inlineHelpText>
+    <inlineHelpText>Pending: verified and waiting to be processed. Skipped: the event was ignored because Salesforce already holds a newer version of the record.</inlineHelpText>
     <label>Status</label>
     <required>true</required>
     <trackTrending>false</trackTrending>
@@ -10,6 +10,11 @@
         <restricted>true</restricted>
         <valueSetDefinition>
             <sorted>false</sorted>
+            <value>
+                <fullName>Pending</fullName>
+                <default>false</default>
+                <label>Pending</label>
+            </value>
             <value>
                 <fullName>Success</fullName>
                 <default>false</default>

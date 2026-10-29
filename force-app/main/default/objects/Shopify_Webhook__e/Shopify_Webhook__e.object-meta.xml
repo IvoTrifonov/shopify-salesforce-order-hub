@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Published by the webhook endpoint for each verified webhook. Its subscriber processes the payload stored on the referenced Sync_Log__c outside the Site guest user context.</description>
+    <eventType>HighVolume</eventType>
+    <label>Shopify Webhook</label>
+    <pluralLabel>Shopify Webhooks</pluralLabel>
+    <publishBehavior>PublishAfterCommit</publishBehavior>
+</CustomObject>
