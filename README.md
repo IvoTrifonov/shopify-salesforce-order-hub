@@ -26,8 +26,14 @@ creates products and price book entries per variant, and upserts the Order
 and its lines using Shopify IDs as external IDs, making the operation
 idempotent. Shipping is stored as an order line so `Order.TotalAmount`
 matches Shopify's total. Out-of-order deliveries are ignored by comparing the
-payload's `updated_at` with `Order.Shopify_Updated_At__c`. A trigger
-framework (one trigger per object, handler pattern) creates invoices.
+payload's `updated_at` with `Order.Shopify_Updated_At__c`.
+
+**Triggers.** Each object has one logic-free trigger that delegates to a
+handler extending `TriggerHandler`, which dispatches each trigger event to
+an overridable method and lets handlers be bypassed per transaction (e.g.
+`TriggerHandler.bypass(OrderTriggerHandler.class)`). `OrderTriggerHandler`
+creates a `Paid` invoice when an order becomes paid, unless it already has
+an open one.
 
 ```mermaid
 sequenceDiagram
@@ -135,14 +141,14 @@ top of that working path.
 
 - [x] SFDX project scaffold
 - [x] Data model (standard `Order` / `OrderItem` / `Product2` + `Invoice__c`, `Sync_Log__c`)
-- [ ] Trigger framework
+- [x] Trigger framework
 - [x] Inbound webhook endpoint with HMAC verification (`orders/create`)
 - [ ] CI/CD pipeline (deploy validation + Apex tests on every PR)
 
 **Milestone 2: full sync**
 
 - [ ] `orders/updated` and `refunds/create` webhooks with out-of-order handling
-- [ ] Invoice generation and Account/Contact matching
+- [x] Invoice generation and Account/Contact matching
 - [ ] Outbound fulfillment sync (Platform Event → Queueable → GraphQL Admin API, with retry)
 - [ ] Custom Metadata configuration
 
