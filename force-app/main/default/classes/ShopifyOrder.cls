@@ -13,14 +13,38 @@ public class ShopifyOrder {
     public String fulfillment_status;
     public String total_price;
     public Customer customer;
-    public List<LineItem> line_items = new List<LineItem>();
-    public List<ShippingLine> shipping_lines = new List<ShippingLine>();
+    public Address billing_address;
+    public Address shipping_address;
+    public List<LineItem> line_items;
+    public List<ShippingLine> shipping_lines;
 
     public class Customer {
         public Long id;
         public String email;
         public String first_name;
         public String last_name;
+    }
+
+    public class Address {
+        public String address1;
+        public String address2;
+        public String city;
+        public String zip;
+        public String province_code;
+        public String country_code;
+
+        /**
+         * address1 and address2 as separate lines, or null when both are blank.
+         */
+        public String street() {
+            List<String> lines = new List<String>();
+            for (String line : new List<String>{ address1, address2 }) {
+                if (String.isNotBlank(line)) {
+                    lines.add(line.trim());
+                }
+            }
+            return lines.isEmpty() ? null : String.join(lines, '\n');
+        }
     }
 
     public class LineItem {
@@ -45,6 +69,9 @@ public class ShopifyOrder {
         if (order?.id == null) {
             throw new JSONException('Payload is not a Shopify order: missing id.');
         }
+        // JSON.deserialize skips field initializers, so absent arrays would otherwise stay null
+        order.line_items = order.line_items ?? new List<LineItem>();
+        order.shipping_lines = order.shipping_lines ?? new List<ShippingLine>();
         return order;
     }
 
