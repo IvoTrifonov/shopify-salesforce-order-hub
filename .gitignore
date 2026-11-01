@@ -49,3 +49,6 @@ $RECYCLE.BIN/
 
 # Local developer notes
 local-notes.md
+# Claude Code personal settings
+.claude/settings.local.json
+.claude/learned-topics.md
