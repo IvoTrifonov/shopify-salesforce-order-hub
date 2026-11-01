@@ -26,5 +26,5 @@ runs:
           echo "::error::SFDX_AUTH_URL secret is not set (secrets are not available to pull requests from forks)."
           exit 1
         fi
-        # Read from stdin so the URL never appears in a file or on the command line
-        echo "$SFDX_AUTH_URL" | sf org login sfdx-url --sfdx-url-stdin --alias orderhub
+        # Read from stdin ("-") so the URL never appears in a file or on the command line
+        echo "$SFDX_AUTH_URL" | sf org login sfdx-url --sfdx-url-stdin - --alias orderhub

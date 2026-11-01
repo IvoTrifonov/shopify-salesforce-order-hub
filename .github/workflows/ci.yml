@@ -32,7 +32,8 @@ jobs:
       - run: npm ci
       - run: npm run prettier:verify
       - run: npm run lint
-      - run: npm run test:unit -- --passWithNoTests
+      # sfdx-lwc-jest passes arguments after its own "--" through to Jest
+      - run: npm run test:unit -- -- --passWithNoTests
 
   validate:
     name: Validate deploy + Apex tests
