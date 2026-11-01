@@ -1,5 +1,8 @@
 # Shopify → Salesforce Order Hub
 
+[![CI](https://github.com/IvoTrifonov/shopify-salesforce-order-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/IvoTrifonov/shopify-salesforce-order-hub/actions/workflows/ci.yml)
+[![Deploy](https://github.com/IvoTrifonov/shopify-salesforce-order-hub/actions/workflows/deploy.yml/badge.svg)](https://github.com/IvoTrifonov/shopify-salesforce-order-hub/actions/workflows/deploy.yml)
+
 Bi-directional, event-driven integration between a real [Shopify](https://www.shopify.com/)
 storefront and Salesforce. Shopify acts as the system of record for orders;
 Salesforce serves as the back office where orders are processed, invoiced,
@@ -143,7 +146,7 @@ top of that working path.
 - [x] Data model (standard `Order` / `OrderItem` / `Product2` + `Invoice__c`, `Sync_Log__c`)
 - [x] Trigger framework
 - [x] Inbound webhook endpoint with HMAC verification (`orders/create`)
-- [ ] CI/CD pipeline (deploy validation + Apex tests on every PR)
+- [x] CI/CD pipeline (deploy validation + Apex tests on every PR)
 
 **Milestone 2: full sync**
 
@@ -172,6 +175,7 @@ Lightning Web Components · SFDX · GitHub Actions CI/CD
 - `config/` — scratch org definitions
 - `scripts/` — automation scripts
 - `docs/` — design decisions and architecture documentation
+- `.github/` — GitHub Actions workflows (CI and deploy)
 
 ## Development
 
@@ -185,6 +189,19 @@ Common commands:
 | `sf project retrieve start --metadata <type>:<name>` | Retrieve metadata from the org |
 | `sf apex run test --test-level RunLocalTests`        | Run Apex tests                 |
 | `sf org open`                                        | Open the org in a browser      |
+
+### CI/CD
+
+[GitHub Actions](.github/workflows/) checks every pull request and deploys
+`main` ([ADR 0003](docs/decisions/0003-ci-cd-pipeline.md)):
+
+| Workflow | Trigger                         | What it does                                                                                  |
+| -------- | ------------------------------- | --------------------------------------------------------------------------------------------- |
+| CI       | Pull request to `main`          | Prettier, ESLint and LWC Jest; check-only deployment to the org with all local Apex tests     |
+| Deploy   | Push to `main` (`force-app/**`) | Deploys `force-app` with all local Apex tests; per-class coverage is shown in the job summary |
+
+Locally, `npm run prettier:verify`, `npm run lint` and `npm test` run the
+same static checks.
 
 ## License
 

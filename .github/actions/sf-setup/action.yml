@@ -1,0 +1,30 @@
+name: Set up Salesforce CLI
+description: Installs a pinned Salesforce CLI and logs in to the orderhub org with an SFDX auth URL.
+
+inputs:
+  sfdx-auth-url:
+    description: SFDX auth URL of the orderhub org (from the SFDX_AUTH_URL secret)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 22
+
+    - name: Install Salesforce CLI
+      shell: bash
+      run: npm install --global @salesforce/cli@2.155.7
+
+    - name: Log in to orderhub
+      shell: bash
+      env:
+        SFDX_AUTH_URL: ${{ inputs.sfdx-auth-url }}
+      run: |
+        if [ -z "$SFDX_AUTH_URL" ]; then
+          echo "::error::SFDX_AUTH_URL secret is not set (secrets are not available to pull requests from forks)."
+          exit 1
+        fi
+        # Read from stdin so the URL never appears in a file or on the command line
+        echo "$SFDX_AUTH_URL" | sf org login sfdx-url --sfdx-url-stdin --alias orderhub

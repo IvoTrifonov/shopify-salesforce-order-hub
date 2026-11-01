@@ -15,6 +15,10 @@ Detailed rules live in `.claude/rules/`; follow all of them.
 - Shopify: a development store with an `orders/create` webhook pointing at the
   Salesforce Site endpoint `/shopify/services/apexrest/shopify/webhooks`.
 - Local, untracked details (org username, store URL) are in `local-notes.md`.
+- CI/CD (GitHub Actions, auth via the `SFDX_AUTH_URL` repository secret):
+  every PR to `main` is validated against `orderhub`, and every merge to
+  `main` that touches `force-app` deploys to `orderhub`. Anything deployed by
+  hand that is not on `main` is overwritten by the next merge.
 
 ## Where things live
 
@@ -28,6 +32,7 @@ Detailed rules live in `.claude/rules/`; follow all of them.
 | Test data                          | `ShopifyTestData`, static resource `ShopifyOrderCreateFixture`                |
 | Settings                           | `Shopify_Settings__c` (protected custom setting, holds the webhook secret)    |
 | Permissions                        | `Order_Hub_Admin`, `Shopify_Webhook_Guest` permission sets                    |
+| CI/CD                              | `.github/workflows/` (`ci.yml`, `deploy.yml`), `.github/actions/sf-setup`     |
 
 ## Skills
 
