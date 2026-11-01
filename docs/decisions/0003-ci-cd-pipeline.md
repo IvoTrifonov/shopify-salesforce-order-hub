@@ -38,7 +38,8 @@ contains the org's hostname and ID.
 
 - PR validation and the main deploy use the same org as development, so a
   merge overwrites anything deployed by hand that is not on `main`.
-- The auth URL holds a refresh token for the integration user. It can be
+- The auth URL holds a refresh token for the admin user who authorized the
+  CLI. It can be
   revoked in Setup (Connected Apps OAuth Usage) and replaced. A JWT bearer
   flow with an External Client App would avoid a long-lived refresh token
   and is the planned upgrade if a second org is added.

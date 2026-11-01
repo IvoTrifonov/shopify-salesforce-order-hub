@@ -47,7 +47,7 @@ sequenceDiagram
     end
     participant L as Sync_Log__c
     participant B as Event bus
-    box Transaction 2 · Automated Process user
+    box Transaction 2 · Order Hub Integration user
         participant P as ShopifyWebhookProcessor
         participant O as ShopifyOrderService
     end
@@ -115,8 +115,10 @@ which Apex must read to compute the HMAC, lives in the protected
 | `Order_Status_Changed__e` | Platform Event driving outbound sync (published after commit)                      | `Order_Id__c`, `Shopify_Order_Id__c`, `Previous_Status__c`, `New_Status__c`                                                                                                                                                |
 
 Shopify status picklists use Shopify's own tokens as value API names (e.g.
-`partially_paid`). Access is granted through the `Order_Hub_Admin` permission
-set. See [ADR 0001](docs/decisions/0001-standard-order-objects.md) for the
+`partially_paid`). Back-office users get access through the `Order_Hub_Admin` permission set.
+Webhook processing runs as a dedicated API-only integration user with the
+least-privilege `Order_Hub_Integration` permission set
+([ADR 0004](docs/decisions/0004-integration-user.md)). See [ADR 0001](docs/decisions/0001-standard-order-objects.md) for the
 reasoning behind the model and [ADR 0002](docs/decisions/0002-asynchronous-webhook-processing.md)
 for how webhooks are processed.
 
