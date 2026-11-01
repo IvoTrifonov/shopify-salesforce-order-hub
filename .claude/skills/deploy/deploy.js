@@ -15,7 +15,10 @@ function parseArgs(argv) {
         } else if (arg === '--no-tests') {
             options.noTests = true;
         } else if (arg === '--tests') {
-            options.tests = (argv[++i] || '').split(',').map((name) => name.trim()).filter(Boolean);
+            options.tests = (argv[++i] || '')
+                .split(',')
+                .map((name) => name.trim())
+                .filter(Boolean);
         } else if (arg === '--path') {
             options.sourceDir = argv[++i];
         } else {
@@ -32,7 +35,12 @@ function localClassNames() {
     const dir = path.join(PROJECT_DIR, 'force-app', 'main', 'default', 'classes');
     const triggers = path.join(PROJECT_DIR, 'force-app', 'main', 'default', 'triggers');
     const names = (folder, ext) =>
-        fs.existsSync(folder) ? fs.readdirSync(folder).filter((f) => f.endsWith(ext)).map((f) => f.slice(0, -ext.length)) : [];
+        fs.existsSync(folder)
+            ? fs
+                  .readdirSync(folder)
+                  .filter((f) => f.endsWith(ext))
+                  .map((f) => f.slice(0, -ext.length))
+            : [];
     return new Set([...names(dir, '.cls'), ...names(triggers, '.trigger')]);
 }
 
@@ -73,7 +81,9 @@ function main() {
     if (componentFailures.length) {
         console.log('\nComponent failures:');
         componentFailures.forEach((f) =>
-            console.log(`  ${f.componentType} ${f.fullName} (${f.lineNumber ?? '-'}:${f.columnNumber ?? '-'}): ${f.problem}`)
+            console.log(
+                `  ${f.componentType} ${f.fullName} (${f.lineNumber ?? '-'}:${f.columnNumber ?? '-'}): ${f.problem}`
+            )
         );
     }
 
@@ -97,7 +107,9 @@ function main() {
     if (coverage.length) {
         console.log('\nCoverage:');
         coverage.forEach((c) =>
-            console.log(`  ${String(c.percent).padStart(3)}%  ${c.name}${c.percent < COVERAGE_TARGET ? '  <-- below ' + COVERAGE_TARGET + '%' : ''}`)
+            console.log(
+                `  ${String(c.percent).padStart(3)}%  ${c.name}${c.percent < COVERAGE_TARGET ? '  <-- below ' + COVERAGE_TARGET + '%' : ''}`
+            )
         );
     }
 

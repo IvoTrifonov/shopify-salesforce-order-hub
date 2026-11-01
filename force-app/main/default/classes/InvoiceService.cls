@@ -16,7 +16,11 @@ public with sharing class InvoiceService {
         }
 
         Set<Id> invoicedOrderIds = new Set<Id>();
-        for (Invoice__c existing : [SELECT Order__c FROM Invoice__c WHERE Order__c IN :orders AND Status__c != :VOIDED]) {
+        for (Invoice__c existing : [
+            SELECT Order__c
+            FROM Invoice__c
+            WHERE Order__c IN :orders AND Status__c != :VOIDED
+        ]) {
             invoicedOrderIds.add(existing.Order__c);
         }
 

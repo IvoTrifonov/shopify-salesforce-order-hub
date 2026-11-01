@@ -55,7 +55,10 @@ function anonymize(payload) {
         }
         originals.add(value.trim());
         if (NAME_KEYS.has(key)) {
-            value.split(/\s+/).filter((part) => part.length >= MIN_LEAK_LENGTH).forEach((part) => originals.add(part));
+            value
+                .split(/\s+/)
+                .filter((part) => part.length >= MIN_LEAK_LENGTH)
+                .forEach((part) => originals.add(part));
         }
     };
 
@@ -96,7 +99,9 @@ function anonymize(payload) {
     const isPresent = (value) =>
         new RegExp('(^|[^\\p{L}\\p{N}])' + escapeRegExp(value) + '($|[^\\p{L}\\p{N}])', 'iu').test(output);
     const leaks = [...originals].filter((value) => !replacementWords.has(value.toLowerCase()) && isPresent(value));
-    const foreignEmails = (output.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g) || []).filter((email) => !/@example\.com$/i.test(email));
+    const foreignEmails = (output.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g) || []).filter(
+        (email) => !/@example\.com$/i.test(email)
+    );
 
     return { output: output + '\n', leaks, foreignEmails };
 }

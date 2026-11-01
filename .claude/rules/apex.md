@@ -1,7 +1,7 @@
 ---
 paths:
-  - "force-app/**/*.cls"
-  - "force-app/**/*.trigger"
+  - 'force-app/**/*.cls'
+  - 'force-app/**/*.trigger'
 ---
 
 # Apex conventions
@@ -21,7 +21,7 @@ paths:
 - Code running as the Site guest user only verifies, stores and publishes.
   Anything touching orders or customers runs in the Platform Event subscriber.
 - Picklist values that mirror Shopify use Shopify's own tokens as API names.
-- Prefer clear names over comments. Comments explain *why*, not *what*.
+- Prefer clear names over comments. Comments explain _why_, not _what_.
 - New metadata uses the API version in `sfdx-project.json`.
 
 ## Tests

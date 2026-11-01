@@ -1,5 +1,8 @@
 # Shopify → Salesforce Order Hub
 
+[![CI](https://github.com/IvoTrifonov/shopify-salesforce-order-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/IvoTrifonov/shopify-salesforce-order-hub/actions/workflows/ci.yml)
+[![Deploy](https://github.com/IvoTrifonov/shopify-salesforce-order-hub/actions/workflows/deploy.yml/badge.svg)](https://github.com/IvoTrifonov/shopify-salesforce-order-hub/actions/workflows/deploy.yml)
+
 Bi-directional, event-driven integration between a real [Shopify](https://www.shopify.com/)
 storefront and Salesforce. Shopify acts as the system of record for orders;
 Salesforce serves as the back office where orders are processed, invoiced,
@@ -100,16 +103,16 @@ which Apex must read to compute the HMAC, lives in the protected
 
 ## Data model
 
-| Object | Purpose | Key fields |
-|---|---|---|
-| `Order` (standard) | Shopify order header | `Shopify_Order_Id__c` (external ID), `Shopify_Order_Name__c`, `Financial_Status__c`, `Shopify_Fulfillment_Status__c`, `Shopify_Total_Price__c`, `Customer_Email__c`, `Shopify_Updated_At__c` |
-| `OrderItem` (standard) | Order line | `Shopify_Line_Item_Id__c` (external ID), `Variant_Title__c` |
-| `Product2` (standard) | Product variant | `Shopify_Product_Id__c`, `Shopify_Variant_Id__c` (external ID) |
-| `Invoice__c` | Invoice generated from an order | `Order__c`, `Status__c`, `Invoice_Date__c`, `Due_Date__c`, `Total_Amount__c` |
-| `Sync_Log__c` | Audit trail of every inbound/outbound sync | `Direction__c`, `Status__c`, `Event_Topic__c`, `Shopify_Reference__c`, `HTTP_Status_Code__c`, `Retry_Count__c`, `Payload__c`, `Error_Message__c`, `Order__c` |
-| `Shopify_Webhook__e` | Platform Event handing verified webhooks to the processor (published after commit) | `Sync_Log_Id__c`, `Topic__c` |
-| `Shopify_Settings__c` | Protected hierarchy custom setting | `Webhook_Secret__c` |
-| `Order_Status_Changed__e` | Platform Event driving outbound sync (published after commit) | `Order_Id__c`, `Shopify_Order_Id__c`, `Previous_Status__c`, `New_Status__c` |
+| Object                    | Purpose                                                                            | Key fields                                                                                                                                                                                   |
+| ------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Order` (standard)        | Shopify order header                                                               | `Shopify_Order_Id__c` (external ID), `Shopify_Order_Name__c`, `Financial_Status__c`, `Shopify_Fulfillment_Status__c`, `Shopify_Total_Price__c`, `Customer_Email__c`, `Shopify_Updated_At__c` |
+| `OrderItem` (standard)    | Order line                                                                         | `Shopify_Line_Item_Id__c` (external ID), `Variant_Title__c`                                                                                                                                  |
+| `Product2` (standard)     | Product variant                                                                    | `Shopify_Product_Id__c`, `Shopify_Variant_Id__c` (external ID)                                                                                                                               |
+| `Invoice__c`              | Invoice generated from an order                                                    | `Order__c`, `Status__c`, `Invoice_Date__c`, `Due_Date__c`, `Total_Amount__c`                                                                                                                 |
+| `Sync_Log__c`             | Audit trail of every inbound/outbound sync                                         | `Direction__c`, `Status__c`, `Event_Topic__c`, `Shopify_Reference__c`, `HTTP_Status_Code__c`, `Retry_Count__c`, `Payload__c`, `Error_Message__c`, `Order__c`                                 |
+| `Shopify_Webhook__e`      | Platform Event handing verified webhooks to the processor (published after commit) | `Sync_Log_Id__c`, `Topic__c`                                                                                                                                                                 |
+| `Shopify_Settings__c`     | Protected hierarchy custom setting                                                 | `Webhook_Secret__c`                                                                                                                                                                          |
+| `Order_Status_Changed__e` | Platform Event driving outbound sync (published after commit)                      | `Order_Id__c`, `Shopify_Order_Id__c`, `Previous_Status__c`, `New_Status__c`                                                                                                                  |
 
 Shopify status picklists use Shopify's own tokens as value API names (e.g.
 `partially_paid`). Access is granted through the `Order_Hub_Admin` permission
@@ -143,7 +146,7 @@ top of that working path.
 - [x] Data model (standard `Order` / `OrderItem` / `Product2` + `Invoice__c`, `Sync_Log__c`)
 - [x] Trigger framework
 - [x] Inbound webhook endpoint with HMAC verification (`orders/create`)
-- [ ] CI/CD pipeline (deploy validation + Apex tests on every PR)
+- [x] CI/CD pipeline (deploy validation + Apex tests on every PR)
 
 **Milestone 2: full sync**
 
@@ -172,19 +175,33 @@ Lightning Web Components · SFDX · GitHub Actions CI/CD
 - `config/` — scratch org definitions
 - `scripts/` — automation scripts
 - `docs/` — design decisions and architecture documentation
+- `.github/` — GitHub Actions workflows (CI and deploy)
 
 ## Development
 
 Built with the [Salesforce CLI](https://developer.salesforce.com/tools/salesforcecli).
 Common commands:
 
-| Command | Purpose |
-|---|---|
-| `sf org login web` | Authorize an org |
-| `sf project deploy start --source-dir force-app` | Deploy all metadata to the org |
+| Command                                              | Purpose                        |
+| ---------------------------------------------------- | ------------------------------ |
+| `sf org login web`                                   | Authorize an org               |
+| `sf project deploy start --source-dir force-app`     | Deploy all metadata to the org |
 | `sf project retrieve start --metadata <type>:<name>` | Retrieve metadata from the org |
-| `sf apex run test --test-level RunLocalTests` | Run Apex tests |
-| `sf org open` | Open the org in a browser |
+| `sf apex run test --test-level RunLocalTests`        | Run Apex tests                 |
+| `sf org open`                                        | Open the org in a browser      |
+
+### CI/CD
+
+[GitHub Actions](.github/workflows/) checks every pull request and deploys
+`main` ([ADR 0003](docs/decisions/0003-ci-cd-pipeline.md)):
+
+| Workflow | Trigger                         | What it does                                                                                  |
+| -------- | ------------------------------- | --------------------------------------------------------------------------------------------- |
+| CI       | Pull request to `main`          | Prettier, ESLint and LWC Jest; check-only deployment to the org with all local Apex tests     |
+| Deploy   | Push to `main` (`force-app/**`) | Deploys `force-app` with all local Apex tests; per-class coverage is shown in the job summary |
+
+Locally, `npm run prettier:verify`, `npm run lint` and `npm test` run the
+same static checks.
 
 ## License
 

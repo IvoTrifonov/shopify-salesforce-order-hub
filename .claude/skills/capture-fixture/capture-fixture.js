@@ -60,7 +60,9 @@ function main() {
         throw new Error(`${options.resourceName} already exists. Pass --force to overwrite it.`);
     }
 
-    const description = options.description || `Anonymized ${log.Event_Topic__c || 'Shopify'} webhook payload from the dev store, used by Apex tests.`;
+    const description =
+        options.description ||
+        `Anonymized ${log.Event_Topic__c || 'Shopify'} webhook payload from the dev store, used by Apex tests.`;
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(jsonFile, output);
     fs.writeFileSync(
@@ -77,7 +79,9 @@ function main() {
     );
 
     console.log(`Wrote ${path.relative(PROJECT_DIR, jsonFile)} (${output.length} characters) and its meta file.`);
-    console.log(`Source: ${options.logName}, topic ${log.Event_Topic__c || '-'}. No personal values found in the output.`);
+    console.log(
+        `Source: ${options.logName}, topic ${log.Event_Topic__c || '-'}. No personal values found in the output.`
+    );
     console.log('Next: skim the JSON for free-text personal data, then deploy the static resource.');
 }
 

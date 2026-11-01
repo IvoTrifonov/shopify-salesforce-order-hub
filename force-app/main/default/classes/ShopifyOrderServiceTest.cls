@@ -7,7 +7,9 @@ private class ShopifyOrderServiceTest {
 
     @IsTest
     static void createsOrderWithCustomerProductsAndLines() {
-        Map<String, Id> orderIds = upsertOrders(new List<ShopifyOrder>{ ShopifyOrder.parse(ShopifyTestData.orderPayload()) });
+        Map<String, Id> orderIds = upsertOrders(
+            new List<ShopifyOrder>{ ShopifyOrder.parse(ShopifyTestData.orderPayload()) }
+        );
 
         Order order = [
             SELECT
@@ -96,7 +98,11 @@ private class ShopifyOrderServiceTest {
     static void reusesAccountOfContactWithSameEmail() {
         Account account = new Account(Name = 'Existing Customer');
         insert account;
-        insert new Contact(AccountId = account.Id, LastName = 'Doe', Email = ShopifyTestData.FIXTURE_EMAIL.toUpperCase());
+        insert new Contact(
+            AccountId = account.Id,
+            LastName = 'Doe',
+            Email = ShopifyTestData.FIXTURE_EMAIL.toUpperCase()
+        );
 
         upsertOrders(new List<ShopifyOrder>{ ShopifyOrder.parse(ShopifyTestData.orderPayload()) });
 

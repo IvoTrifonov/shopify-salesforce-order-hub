@@ -55,7 +55,14 @@ global without sharing class ShopifyWebhookResource {
         response.statusCode = 200;
         if (!ShopifyWebhookProcessor.HANDLED_TOPICS.contains(topic)) {
             String reason = 'No handler for topic ' + topic + '.';
-            insertLog(topic, extractShopifyId(body), 'Skipped', response.statusCode, body.left(PAYLOAD_MAX_LENGTH), reason);
+            insertLog(
+                topic,
+                extractShopifyId(body),
+                'Skipped',
+                response.statusCode,
+                body.left(PAYLOAD_MAX_LENGTH),
+                reason
+            );
             return;
         }
         Sync_Log__c log = insertLog(

@@ -1,0 +1,45 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths: ['force-app/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SF_DISABLE_AUTOUPDATE: 'true'
+  SF_DISABLE_TELEMETRY: 'true'
+
+jobs:
+  deploy:
+    name: Deploy to orderhub
+    runs-on: ubuntu-latest
+    # Records each run under the repository's Deployments
+    environment: orderhub
+    # Shared with CI validation: the org runs one deployment at a time
+    concurrency:
+      group: orderhub-org
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/sf-setup
+        with:
+          sfdx-auth-url: ${{ secrets.SFDX_AUTH_URL }}
+
+      - name: Deploy and run local tests
+        run: >
+          sf project deploy start
+          --source-dir force-app
+          --target-org orderhub
+          --test-level RunLocalTests
+          --coverage-formatters json-summary
+          --results-dir test-results
+          --wait 30
+
+      - name: Coverage summary
+        if: always()
+        run: node .github/scripts/coverage-summary.js test-results/coverage/coverage-summary.json >> "$GITHUB_STEP_SUMMARY"

@@ -9,7 +9,8 @@ const SOURCE_DIR = path.join(PROJECT_DIR, 'force-app', 'main', 'default');
 const CLAUDE_DIR = path.join(PROJECT_DIR, '.claude');
 
 // Only trailing whitespace is trimmed: `git status --porcelain` lines start with a significant space
-const git = (args) => execSync(`git ${args}`, { cwd: PROJECT_DIR, encoding: 'utf8', maxBuffer: 50 * 1024 * 1024 }).trimEnd();
+const git = (args) =>
+    execSync(`git ${args}`, { cwd: PROJECT_DIR, encoding: 'utf8', maxBuffer: 50 * 1024 * 1024 }).trimEnd();
 
 // Kinds of files, in report order. First match wins.
 const KINDS = [
@@ -111,7 +112,11 @@ function claudeText() {
 
 function main() {
     const base = git('log -1 --format=%h -- .claude') || null;
-    console.log(base ? `Changes since ${base} (last commit touching .claude/):` : 'No commit touches .claude/ yet; reviewing uncommitted work.');
+    console.log(
+        base
+            ? `Changes since ${base} (last commit touching .claude/):`
+            : 'No commit touches .claude/ yet; reviewing uncommitted work.'
+    );
 
     const commits = base ? git(`log --oneline ${base}..HEAD`) : '';
     console.log(`\nCommits since then: ${commits ? commits.split('\n').length : 0}`);
@@ -132,13 +137,18 @@ function main() {
     for (const [kind] of KINDS) {
         if (groups.has(kind)) {
             console.log(`  ${kind}:`);
-            groups.get(kind).sort().forEach((line) => console.log(`    ${line}`));
+            groups
+                .get(kind)
+                .sort()
+                .forEach((line) => console.log(`    ${line}`));
         }
     }
 
     const added = [...files].filter(([, status]) => status === 'A').map(([file]) => file);
     const newComponents = added.filter((file) =>
-        /\/(classes\/(?!\w+Test\.cls)\w+\.cls|triggers\/\w+\.trigger|objects\/\w+__[ce]\/\w+__[ce]\.object-meta\.xml|lwc\/\w+\/\w+\.js|flows\/.+|aura\/\w+\/\w+\.cmp)$|^\.github\/workflows\//.test(file)
+        /\/(classes\/(?!\w+Test\.cls)\w+\.cls|triggers\/\w+\.trigger|objects\/\w+__[ce]\/\w+__[ce]\.object-meta\.xml|lwc\/\w+\/\w+\.js|flows\/.+|aura\/\w+\/\w+\.cmp)$|^\.github\/workflows\//.test(
+            file
+        )
     );
     console.log('\nNew components:');
     console.log(newComponents.length ? newComponents.map((f) => `  ${f}`).join('\n') : '  none');
@@ -164,7 +174,11 @@ function main() {
     const historical = new Set(
         git('log --all --format= --name-only --diff-filter=A -- force-app')
             .split('\n')
-            .map((file) => file.match(/\/(?:classes|triggers|staticresources|permissionsets)\/(\w+)\.|\/objects\/(\w+__[cem]\w*)\//))
+            .map((file) =>
+                file.match(
+                    /\/(?:classes|triggers|staticresources|permissionsets)\/(\w+)\.|\/objects\/(\w+__[cem]\w*)\//
+                )
+            )
             .filter(Boolean)
             .map((match) => match[1] || match[2])
     );

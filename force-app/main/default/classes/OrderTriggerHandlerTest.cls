@@ -11,7 +11,10 @@ private class OrderTriggerHandlerTest {
 
         insert order;
 
-        Invoice__c invoice = [SELECT Order__c, Status__c, Invoice_Date__c, Due_Date__c, Total_Amount__c FROM Invoice__c];
+        Invoice__c invoice = [
+            SELECT Order__c, Status__c, Invoice_Date__c, Due_Date__c, Total_Amount__c
+            FROM Invoice__c
+        ];
         Assert.areEqual(order.Id, invoice.Order__c);
         Assert.areEqual(InvoiceService.PAID, invoice.Status__c);
         Assert.areEqual(Date.today(), invoice.Invoice_Date__c);

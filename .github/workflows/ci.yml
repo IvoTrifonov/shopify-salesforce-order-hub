@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same PR supersedes the running checks
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SF_DISABLE_AUTOUPDATE: 'true'
+  SF_DISABLE_TELEMETRY: 'true'
+
+jobs:
+  static:
+    name: Format, lint, LWC tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run prettier:verify
+      - run: npm run lint
+      # sfdx-lwc-jest passes arguments after its own "--" through to Jest
+      - run: npm run test:unit -- -- --passWithNoTests
+
+  validate:
+    name: Validate deploy + Apex tests
+    runs-on: ubuntu-latest
+    # Secrets are not passed to PRs from forks, so only validate PRs from this repository
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    # The org runs one deployment at a time; queue behind any running validation or deploy
+    concurrency:
+      group: orderhub-org
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/sf-setup
+        with:
+          sfdx-auth-url: ${{ secrets.SFDX_AUTH_URL }}
+
+      - name: Validate deployment and run local tests
+        run: >
+          sf project deploy validate
+          --source-dir force-app
+          --target-org orderhub
+          --test-level RunLocalTests
+          --coverage-formatters json-summary
+          --results-dir test-results
+          --wait 30
+
+      - name: Coverage summary
+        if: always()
+        run: node .github/scripts/coverage-summary.js test-results/coverage/coverage-summary.json >> "$GITHUB_STEP_SUMMARY"
