@@ -40,9 +40,15 @@ committed.
   to the org. It cannot silently revert the trigger to Automated Process.
 - Retrieving the subscriber config from the org writes the real username
   into the source file. Restore the placeholder before committing.
-- The processor's Apex runs in system mode, so the permission set does not
-  restrict what it can do today. It documents the intended access, gives the
-  user access to the records it owns, and is enforced as soon as code moves
-  to user mode.
+- The classes use API 67.0, where SOQL and DML run in user mode by default,
+  so the permission set is enforced: every object and field the processor
+  reads or writes must be granted, standard fields included (e.g.
+  `Contact.AccountId`, `Contact.Email`, the Order addresses), and creating
+  standard price book entries needs Edit on Pricebook2.
+  `ShopifyWebhookProcessorTest` processes an order as a user with only this
+  permission set, so a missing grant fails CI rather than the live sync.
+- A change to the subscriber config's running user takes effect only after the
+  trigger's subscription is suspended and resumed (Setup, Platform Events,
+  Shopify Webhook, Subscriptions, Manage).
 - A new org needs the user created and the permission set assigned before
   the first deploy, or the deploy fails because the username does not exist.

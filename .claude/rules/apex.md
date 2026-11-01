@@ -23,6 +23,11 @@ paths:
 - Picklist values that mirror Shopify use Shopify's own tokens as API names.
 - Prefer clear names over comments. Comments explain _why_, not _what_.
 - New metadata uses the API version in `sfdx-project.json`.
+- Since API 67.0, SOQL, SOSL and DML run in user mode by default (CRUD and FLS
+  of the running user are enforced; `WITH SECURITY_ENFORCED` is gone). Code
+  run by the integration user needs every object and field it touches,
+  standard fields included, in `Order_Hub_Integration`. Use `WITH SYSTEM_MODE`
+  / `AccessLevel.SYSTEM_MODE` only with a stated reason.
 
 ## Tests
 
@@ -33,6 +38,9 @@ paths:
   `testMethod1`.
 - Cover the happy path, negative paths and a 200-record bulk case for any code
   that performs DML. Bulk tests assert on governor limit usage where relevant.
+- Code that runs as a restricted user (integration user, guest user) has a
+  test that runs it with `System.runAs` as a user holding only its permission
+  set; see `ShopifyWebhookProcessorTest`.
 - Callouts are tested with `HttpCalloutMock`; Platform Event subscribers are
   tested with `Test.stopTest()` or `Test.getEventBus().deliver()`.
 - Shopify payloads come from `ShopifyTestData` and its static resource

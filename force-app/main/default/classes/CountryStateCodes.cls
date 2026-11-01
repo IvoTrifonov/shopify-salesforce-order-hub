@@ -6,8 +6,19 @@
 public with sharing class CountryStateCodes {
     // Position of each active country in the country picklist, which validFor bitmaps refer to
     private static Map<String, Integer> indexByCountryCode;
-    private static Map<String, String> validForHexByStateCode;
+    // Not keyed by code: many codes exist in several countries (e.g. WA for Washington and Western Australia)
+    private static List<StateEntry> stateEntries;
     private static final Map<String, Set<String>> STATE_CODES_BY_COUNTRY = new Map<String, Set<String>>();
+
+    private class StateEntry {
+        final String code;
+        final String validForHex;
+
+        StateEntry(String code, String validForHex) {
+            this.code = code;
+            this.validForHex = validForHex;
+        }
+    }
 
     public static Boolean isValidCountry(String countryCode) {
         return countryCode != null && countryIndexes().containsKey(countryCode);
@@ -38,9 +49,9 @@ public with sharing class CountryStateCodes {
         if (!STATE_CODES_BY_COUNTRY.containsKey(countryCode)) {
             Integer countryIndex = countryIndexes().get(countryCode);
             Set<String> codes = new Set<String>();
-            for (String stateCode : validForHexByStateCode().keySet()) {
-                if (isBitSet(validForHexByStateCode.get(stateCode), countryIndex)) {
-                    codes.add(stateCode);
+            for (StateEntry state : stateEntries()) {
+                if (isBitSet(state.validForHex, countryIndex)) {
+                    codes.add(state.code);
                 }
             }
             STATE_CODES_BY_COUNTRY.put(countryCode, codes);
@@ -49,21 +60,20 @@ public with sharing class CountryStateCodes {
     }
 
     // PicklistEntry exposes validFor only through its JSON form
-    private static Map<String, String> validForHexByStateCode() {
-        if (validForHexByStateCode == null) {
-            validForHexByStateCode = new Map<String, String>();
+    private static List<StateEntry> stateEntries() {
+        if (stateEntries == null) {
+            stateEntries = new List<StateEntry>();
             for (Schema.PicklistEntry entry : Order.BillingStateCode.getDescribe().getPicklistValues()) {
                 Map<String, Object> raw = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(entry));
                 String validFor = (String) raw.get('validFor');
                 if (entry.isActive() && String.isNotBlank(validFor)) {
-                    validForHexByStateCode.put(
-                        entry.getValue(),
-                        EncodingUtil.convertToHex(EncodingUtil.base64Decode(validFor))
+                    stateEntries.add(
+                        new StateEntry(entry.getValue(), EncodingUtil.convertToHex(EncodingUtil.base64Decode(validFor)))
                     );
                 }
             }
         }
-        return validForHexByStateCode;
+        return stateEntries;
     }
 
     // Bits are numbered from the most significant bit of the first byte, i.e. of the first hex digit
