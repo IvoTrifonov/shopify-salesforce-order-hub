@@ -1,4 +1,4 @@
-// Relies on the United States and Canada states being enabled, as they are by default
+// Relies on the United States, Canada and Australia states being enabled, as they are by default
 @IsTest
 private class CountryStateCodesTest {
     @IsTest
@@ -17,6 +17,23 @@ private class CountryStateCodesTest {
     static void acceptsStateOfItsOwnCountry() {
         Assert.isTrue(CountryStateCodes.isValidState('US', 'IL'));
         Assert.isTrue(CountryStateCodes.isValidState('CA', 'ON'));
+    }
+
+    @IsTest
+    static void acceptsCodeThatExistsInSeveralCountries() {
+        Assert.isTrue(CountryStateCodes.isValidState('US', 'WA'), 'Washington');
+        Assert.isTrue(CountryStateCodes.isValidState('US', 'CA'), 'California');
+        Assert.isTrue(CountryStateCodes.isValidState('AU', 'WA'), 'Western Australia');
+    }
+
+    @IsTest
+    static void acceptsEveryUsState() {
+        List<String> usStates = ('AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ ' +
+            'NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY')
+            .split(' ');
+        for (String state : usStates) {
+            Assert.isTrue(CountryStateCodes.isValidState('US', state), state);
+        }
     }
 
     @IsTest
