@@ -36,7 +36,10 @@ function block(message) {
 
 // Splits a shell command line into individual commands, e.g. `a && b | c; d`
 function splitCommands(commandLine) {
-    return commandLine.split(/&&|\|\||;|\||\r?\n/).map((part) => part.trim()).filter(Boolean);
+    return commandLine
+        .split(/&&|\|\||;|\||\r?\n/)
+        .map((part) => part.trim())
+        .filter(Boolean);
 }
 
 function checkSfCommand(command) {

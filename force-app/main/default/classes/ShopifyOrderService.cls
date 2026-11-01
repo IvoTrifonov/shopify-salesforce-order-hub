@@ -179,7 +179,10 @@ public without sharing class ShopifyOrderService {
         return new Product2(Name = name, ProductCode = key, Shopify_Variant_Id__c = key, IsActive = true);
     }
 
-    private Map<String, Order> upsertOrderHeaders(List<ShopifyOrder> orders, Map<String, Contact> contactsByCustomerKey) {
+    private Map<String, Order> upsertOrderHeaders(
+        List<ShopifyOrder> orders,
+        Map<String, Contact> contactsByCustomerKey
+    ) {
         Set<String> shopifyIds = new Set<String>();
         for (ShopifyOrder order : orders) {
             shopifyIds.add(order.shopifyId());

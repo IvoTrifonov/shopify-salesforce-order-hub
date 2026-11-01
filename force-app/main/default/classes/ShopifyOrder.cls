@@ -61,7 +61,8 @@ public class ShopifyOrder {
     }
 
     public String customerName() {
-        String fullName = String.join(new List<String>{ customer?.first_name ?? '', customer?.last_name ?? '' }, ' ').trim();
+        String fullName = String.join(new List<String>{ customer?.first_name ?? '', customer?.last_name ?? '' }, ' ')
+            .trim();
         return String.isNotBlank(fullName) ? fullName : (customerEmail() ?? 'Shopify Customer ' + shopifyId());
     }
 

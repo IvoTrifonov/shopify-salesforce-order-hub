@@ -65,7 +65,11 @@ public without sharing class ShopifyWebhookProcessor {
 
     private static void markError(Sync_Log__c log, Exception e) {
         log.Status__c = 'Error';
-        log.Error_Message__c = (e.getTypeName() + ': ' + e.getMessage() + '\n' + e.getStackTraceString())
+        log.Error_Message__c = (e.getTypeName() +
+            ': ' +
+            e.getMessage() +
+            '\n' +
+            e.getStackTraceString())
             .left(Sync_Log__c.Error_Message__c.getDescribe().getLength());
     }
 }

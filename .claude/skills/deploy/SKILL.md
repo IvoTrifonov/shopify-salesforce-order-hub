@@ -14,13 +14,13 @@ classes (anything under 90% is flagged).
 node .claude/skills/deploy/deploy.js [options]
 ```
 
-| Option | Effect |
-|---|---|
-| *(none)* | Deploy `force-app` and run all local tests (`RunLocalTests`) |
-| `--dry-run` | Validate only; nothing is saved in the org |
-| `--tests A,B` | Run only the given test classes (`RunSpecifiedTests`), for quick iterations |
-| `--no-tests` | Skip tests; only for metadata without Apex (`NoTestRun`) |
-| `--path <dir>` | Deploy a sub-folder instead of `force-app` |
+| Option         | Effect                                                                      |
+| -------------- | --------------------------------------------------------------------------- |
+| _(none)_       | Deploy `force-app` and run all local tests (`RunLocalTests`)                |
+| `--dry-run`    | Validate only; nothing is saved in the org                                  |
+| `--tests A,B`  | Run only the given test classes (`RunSpecifiedTests`), for quick iterations |
+| `--no-tests`   | Skip tests; only for metadata without Apex (`NoTestRun`)                    |
+| `--path <dir>` | Deploy a sub-folder instead of `force-app`                                  |
 
 Arguments given by the user: $ARGUMENTS
 

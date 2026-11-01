@@ -11,10 +11,10 @@ node .claude/skills/sync-status/sync-status.js show LOG-000004
 node .claude/skills/sync-status/sync-status.js replay LOG-000004
 ```
 
-| Command | Shows / does |
-|---|---|
-| `list` | Latest logs (default 10): status, topic, Shopify ID, linked Order and its invoices, first line of any error |
-| `show` | One log in full: error message, payload size and key payload fields, the Order with totals, its lines and invoices |
+| Command  | Shows / does                                                                                                                                                   |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list`   | Latest logs (default 10): status, topic, Shopify ID, linked Order and its invoices, first line of any error                                                    |
+| `show`   | One log in full: error message, payload size and key payload fields, the Order with totals, its lines and invoices                                             |
 | `replay` | Sets an inbound log back to `Pending` and publishes `Shopify_Webhook__e`, exactly as the endpoint does, then waits for the processor and prints the new status |
 
 Arguments given by the user: $ARGUMENTS

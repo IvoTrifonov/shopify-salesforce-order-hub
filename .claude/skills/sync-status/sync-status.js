@@ -31,7 +31,9 @@ function invoicesByOrder(orderIds) {
         return byOrder;
     }
     const ids = orderIds.map((id) => `'${id}'`).join(',');
-    for (const inv of query(`SELECT Name, Order__c, Status__c, Total_Amount__c FROM Invoice__c WHERE Order__c IN (${ids}) ORDER BY Name`)) {
+    for (const inv of query(
+        `SELECT Name, Order__c, Status__c, Total_Amount__c FROM Invoice__c WHERE Order__c IN (${ids}) ORDER BY Name`
+    )) {
         if (!byOrder.has(inv.Order__c)) {
             byOrder.set(inv.Order__c, []);
         }
@@ -93,15 +95,28 @@ function show(args) {
     if (!log) {
         throw new Error(`${name} not found.`);
     }
-    console.log(`${log.Name}  ${log.Direction__c} ${log.Event_Topic__c || ''}  ->  ${log.Status__c} (HTTP ${log.HTTP_Status_Code__c ?? '-'})`);
-    console.log(`Created ${log.CreatedDate}, last modified ${log.LastModifiedDate}, retries ${log.Retry_Count__c ?? 0}`);
+    console.log(
+        `${log.Name}  ${log.Direction__c} ${log.Event_Topic__c || ''}  ->  ${log.Status__c} (HTTP ${log.HTTP_Status_Code__c ?? '-'})`
+    );
+    console.log(
+        `Created ${log.CreatedDate}, last modified ${log.LastModifiedDate}, retries ${log.Retry_Count__c ?? 0}`
+    );
     console.log(`Shopify reference: ${log.Shopify_Reference__c || '-'}`);
 
     if (log.Payload__c) {
         console.log(`\nPayload: ${log.Payload__c.length} characters`);
         try {
             const p = JSON.parse(log.Payload__c);
-            const fields = ['id', 'name', 'financial_status', 'fulfillment_status', 'total_price', 'currency', 'updated_at', 'test'];
+            const fields = [
+                'id',
+                'name',
+                'financial_status',
+                'fulfillment_status',
+                'total_price',
+                'currency',
+                'updated_at',
+                'test'
+            ];
             fields.filter((f) => f in p).forEach((f) => console.log(`  ${f}: ${JSON.stringify(p[f])}`));
             if (Array.isArray(p.line_items)) {
                 console.log(`  line_items: ${p.line_items.length}, shipping_lines: ${(p.shipping_lines || []).length}`);
@@ -126,18 +141,25 @@ function show(args) {
             `\nOrder ${order.Name}: ${order.Status}, ${order.EffectiveDate}, financial ${order.Financial_Status__c}, ` +
                 `fulfillment ${order.Shopify_Fulfillment_Status__c}`
         );
-        console.log(`  Customer: ${order.Account ? order.Account.Name : '-'} <${order.BillToContact ? order.BillToContact.Email : '-'}>`);
-        const mismatch = Number(order.TotalAmount) !== Number(order.Shopify_Total_Price__c) ? '  <-- totals differ' : '';
+        console.log(
+            `  Customer: ${order.Account ? order.Account.Name : '-'} <${order.BillToContact ? order.BillToContact.Email : '-'}>`
+        );
+        const mismatch =
+            Number(order.TotalAmount) !== Number(order.Shopify_Total_Price__c) ? '  <-- totals differ' : '';
         console.log(`  TotalAmount ${order.TotalAmount} / Shopify total ${order.Shopify_Total_Price__c}${mismatch}`);
         const items = query(
             `SELECT Product2.Name, Variant_Title__c, Description, Quantity, UnitPrice, TotalPrice FROM OrderItem ` +
                 `WHERE OrderId = '${log.Order__c}' ORDER BY Shopify_Line_Item_Id__c`
         );
         items.forEach((i) =>
-            console.log(`  - ${i.Quantity} x ${i.Product2 ? i.Product2.Name : '?'}${i.Variant_Title__c ? ' (' + i.Variant_Title__c + ')' : ''} @ ${i.UnitPrice} = ${i.TotalPrice}`)
+            console.log(
+                `  - ${i.Quantity} x ${i.Product2 ? i.Product2.Name : '?'}${i.Variant_Title__c ? ' (' + i.Variant_Title__c + ')' : ''} @ ${i.UnitPrice} = ${i.TotalPrice}`
+            )
         );
         const invoices = invoicesByOrder([log.Order__c]).get(log.Order__c) || [];
-        console.log(`  Invoices: ${invoices.length ? invoices.map((i) => `${i.Name} ${i.Status__c} ${i.Total_Amount__c}`).join(', ') : 'none'}`);
+        console.log(
+            `  Invoices: ${invoices.length ? invoices.map((i) => `${i.Name} ${i.Status__c} ${i.Total_Amount__c}`).join(', ') : 'none'}`
+        );
     }
 }
 
@@ -166,7 +188,9 @@ EventBus.publish(new Shopify_Webhook__e(Sync_Log_Id__c = log.Id, Topic__c = log.
     } while (log.Status__c === 'Pending' && Date.now() < deadline);
 
     if (log.Status__c === 'Pending') {
-        console.log(`Still Pending after ${REPLAY_TIMEOUT_MS / 1000}s. Check Setup > Platform Events > Shopify Webhook > Subscriptions.`);
+        console.log(
+            `Still Pending after ${REPLAY_TIMEOUT_MS / 1000}s. Check Setup > Platform Events > Shopify Webhook > Subscriptions.`
+        );
         process.exit(1);
     }
     console.log(`Result: ${log.Status__c}${log.Order__r ? ', Order ' + log.Order__r.Name : ''}`);
