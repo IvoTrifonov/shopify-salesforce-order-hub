@@ -20,7 +20,8 @@ The endpoint verifies the HMAC signature, stores the raw payload in a
 after commit) and returns 200. The guest user only needs Create on
 `Sync_Log__c` and `Shopify_Webhook__e`.
 
-A trigger on the event runs as the Automated Process user and calls
+A trigger on the event runs as the Automated Process user (since
+[ADR 0004](0004-integration-user.md): a dedicated integration user) and calls
 `ShopifyWebhookProcessor`, which upserts the records through
 `ShopifyOrderService` and marks each log `Success` or `Error`.
 

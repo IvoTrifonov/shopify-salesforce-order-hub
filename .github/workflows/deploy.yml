@@ -31,6 +31,9 @@ jobs:
           sfdx-auth-url: ${{ secrets.SFDX_AUTH_URL }}
 
       - name: Deploy and run local tests
+        env:
+          # Running user of the webhook subscriber; replaced into its config (sfdx-project.json)
+          SF_INTEGRATION_USERNAME: ${{ secrets.SF_INTEGRATION_USERNAME }}
         run: >
           sf project deploy start
           --source-dir force-app

@@ -3,4 +3,6 @@
     <batchSize>20</batchSize>
     <masterLabel>ShopifyWebhookEventTriggerConfig</masterLabel>
     <platformEventConsumer>ShopifyWebhookEventTrigger</platformEventConsumer>
+    <!-- Replaced at deploy time from the SF_INTEGRATION_USERNAME environment variable (sfdx-project.json) -->
+    <user>${SF_INTEGRATION_USERNAME}</user>
 </PlatformEventSubscriberConfig>

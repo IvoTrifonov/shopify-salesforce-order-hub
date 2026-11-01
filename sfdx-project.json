@@ -8,5 +8,12 @@
   "name": "shopify-salesforce-order-hub",
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "67.0"
+  "sourceApiVersion": "67.0",
+  "replacements": [
+    {
+      "filename": "force-app/main/default/platformEventSubscriberConfigs/ShopifyWebhookEventTriggerConfig.platformEventSubscriberConfig-meta.xml",
+      "stringToReplace": "${SF_INTEGRATION_USERNAME}",
+      "replaceWithEnv": "SF_INTEGRATION_USERNAME"
+    }
+  ]
 }
