@@ -208,6 +208,8 @@ public without sharing class ShopifyOrderService {
                 Shopify_Total_Price__c = ShopifyOrder.toAmount(order.total_price),
                 Shopify_Updated_At__c = order.updatedAt()
             );
+            setAddress(record, 'Billing', order.billing_address);
+            setAddress(record, 'Shipping', order.shipping_address);
             // Status and price book are set on creation only; they are managed in Salesforce afterwards
             if (!existingIds.contains(order.shopifyId())) {
                 record.Status = NEW_ORDER_STATUS;
@@ -217,6 +219,23 @@ public without sharing class ShopifyOrderService {
         }
         upsert ordersByShopifyId.values() Order.Shopify_Order_Id__c;
         return ordersByShopifyId;
+    }
+
+    /**
+     * Sets the Billing or Shipping address fields. Shopify is the system of record, so a missing
+     * address clears them. A country or state code the org's picklists do not know is left out
+     * rather than failing the order.
+     */
+    private static void setAddress(Order record, String prefix, ShopifyOrder.Address address) {
+        String countryCode = CountryStateCodes.isValidCountry(address?.country_code) ? address.country_code : null;
+        String stateCode = CountryStateCodes.isValidState(countryCode, address?.province_code)
+            ? address.province_code
+            : null;
+        record.put(prefix + 'Street', address?.street());
+        record.put(prefix + 'City', address?.city);
+        record.put(prefix + 'PostalCode', address?.zip);
+        record.put(prefix + 'CountryCode', countryCode);
+        record.put(prefix + 'StateCode', stateCode);
     }
 
     private void upsertOrderItems(

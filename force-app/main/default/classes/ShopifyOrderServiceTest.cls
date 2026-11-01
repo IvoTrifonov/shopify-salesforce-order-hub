@@ -142,6 +142,80 @@ private class ShopifyOrderServiceTest {
     }
 
     @IsTest
+    static void mapsBillingAndShippingAddresses() {
+        Map<String, Object> payload = ShopifyTestData.orderMap();
+        Map<String, Object> shipping = (Map<String, Object>) payload.get('shipping_address');
+        shipping.put('address1', '1 Warehouse Rd');
+        shipping.put('address2', 'Dock 3');
+        shipping.put('city', 'Toronto');
+        shipping.put('zip', 'M5V 2T6');
+        shipping.put('country_code', 'CA');
+        shipping.put('province_code', 'ON');
+
+        upsertOrders(new List<ShopifyOrder>{ ShopifyTestData.order(payload) });
+
+        Order order = [
+            SELECT
+                BillingStreet,
+                BillingCity,
+                BillingPostalCode,
+                BillingStateCode,
+                BillingCountryCode,
+                ShippingStreet,
+                ShippingCity,
+                ShippingPostalCode,
+                ShippingStateCode,
+                ShippingCountryCode
+            FROM Order
+        ];
+        Assert.areEqual('123 Main St', order.BillingStreet);
+        Assert.areEqual('Springfield', order.BillingCity);
+        Assert.areEqual('62701', order.BillingPostalCode);
+        Assert.areEqual('IL', order.BillingStateCode);
+        Assert.areEqual('US', order.BillingCountryCode);
+        Assert.areEqual('1 Warehouse Rd\nDock 3', order.ShippingStreet);
+        Assert.areEqual('Toronto', order.ShippingCity);
+        Assert.areEqual('M5V 2T6', order.ShippingPostalCode);
+        Assert.areEqual('ON', order.ShippingStateCode);
+        Assert.areEqual('CA', order.ShippingCountryCode);
+    }
+
+    @IsTest
+    static void leavesOutAddressCodesTheOrgDoesNotKnow() {
+        Map<String, Object> payload = ShopifyTestData.orderMap();
+        ((Map<String, Object>) payload.get('billing_address')).put('country_code', 'XX');
+        ((Map<String, Object>) payload.get('shipping_address')).put('province_code', 'ON');
+
+        upsertOrders(new List<ShopifyOrder>{ ShopifyTestData.order(payload) });
+
+        Order order = [
+            SELECT BillingStreet, BillingStateCode, BillingCountryCode, ShippingStateCode, ShippingCountryCode
+            FROM Order
+        ];
+        Assert.areEqual('123 Main St', order.BillingStreet, 'The rest of the address is kept');
+        Assert.isNull(order.BillingCountryCode);
+        Assert.isNull(order.BillingStateCode, 'A state needs a valid country');
+        Assert.areEqual('US', order.ShippingCountryCode);
+        Assert.isNull(order.ShippingStateCode, 'Ontario is not a US state');
+    }
+
+    @IsTest
+    static void clearsAddressesThatAreNoLongerInThePayload() {
+        upsertOrders(new List<ShopifyOrder>{ ShopifyOrder.parse(ShopifyTestData.orderPayload()) });
+
+        Map<String, Object> withoutAddresses = ShopifyTestData.orderMap();
+        withoutAddresses.put('billing_address', null);
+        withoutAddresses.remove('shipping_address');
+        upsertOrders(new List<ShopifyOrder>{ ShopifyTestData.order(withoutAddresses) });
+
+        Order order = [SELECT BillingStreet, BillingCountryCode, ShippingCity, ShippingStateCode FROM Order];
+        Assert.isNull(order.BillingStreet);
+        Assert.isNull(order.BillingCountryCode);
+        Assert.isNull(order.ShippingCity);
+        Assert.isNull(order.ShippingStateCode);
+    }
+
+    @IsTest
     static void keepsLatestVersionWhenOrderAppearsTwiceInOneBatch() {
         Map<String, Object> older = ShopifyTestData.orderMap();
         Map<String, Object> newer = ShopifyTestData.orderMap();
