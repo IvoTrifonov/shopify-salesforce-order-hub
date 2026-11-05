@@ -7,6 +7,10 @@
  * Every step is idempotent (keyed by Shopify IDs) and bulkified: the DML and
  * SOQL count does not grow with the number of orders.
  *
+ * Updates of an existing order change its header only: a version older than the
+ * stored one is ignored, and lines are written when the order is created
+ * (order edits are not synced yet; activated orders lock their OrderItems).
+ *
  * Runs `without sharing`: customers must be matched against all Contacts, not
  * just those the running integration user can see, or duplicates are created.
  */
@@ -23,20 +27,32 @@ public without sharing class ShopifyOrderService {
     private final Id pricebookId = standardPricebookId();
 
     /**
-     * Upserts the given orders and returns the Salesforce Order Id by Shopify order ID.
+     * Upserts the given orders and returns, by Shopify order ID, the Order as Salesforce now
+     * holds it (Id and Shopify_Updated_At__c), including orders whose given version was too old.
      */
-    public Map<String, Id> upsertOrders(List<ShopifyOrder> shopifyOrders) {
-        List<ShopifyOrder> orders = latestVersions(shopifyOrders);
-        Map<String, Contact> contactsByCustomerKey = upsertCustomers(orders);
-        Map<String, Id> entryIdsByProductKey = upsertProducts(orders);
-        Map<String, Order> ordersByShopifyId = upsertOrderHeaders(orders, contactsByCustomerKey);
-        upsertOrderItems(orders, ordersByShopifyId, entryIdsByProductKey);
+    public Map<String, Order> upsertOrders(List<ShopifyOrder> shopifyOrders) {
+        List<ShopifyOrder> latest = latestVersions(shopifyOrders);
+        Map<String, Order> storedByShopifyId = storedOrders(latest);
 
-        Map<String, Id> orderIds = new Map<String, Id>();
-        for (String shopifyId : ordersByShopifyId.keySet()) {
-            orderIds.put(shopifyId, ordersByShopifyId.get(shopifyId).Id);
+        List<ShopifyOrder> orders = new List<ShopifyOrder>();
+        List<ShopifyOrder> newOrders = new List<ShopifyOrder>();
+        for (ShopifyOrder order : latest) {
+            Order stored = storedByShopifyId.get(order.shopifyId());
+            if (stored == null) {
+                newOrders.add(order);
+                orders.add(order);
+            } else if (!order.isOlderThan(stored.Shopify_Updated_At__c)) {
+                orders.add(order);
+            }
         }
-        return orderIds;
+
+        Map<String, Contact> contactsByCustomerKey = upsertCustomers(orders);
+        Map<String, Id> entryIdsByProductKey = upsertProducts(newOrders);
+        Map<String, Order> ordersByShopifyId = upsertOrderHeaders(orders, storedByShopifyId, contactsByCustomerKey);
+        insertOrderItems(newOrders, ordersByShopifyId, entryIdsByProductKey);
+
+        storedByShopifyId.putAll(ordersByShopifyId);
+        return storedByShopifyId;
     }
 
     // The same order can arrive more than once in a batch; upserting duplicate external IDs fails
@@ -49,6 +65,22 @@ public without sharing class ShopifyOrderService {
             }
         }
         return latestById.values();
+    }
+
+    private static Map<String, Order> storedOrders(List<ShopifyOrder> orders) {
+        Set<String> shopifyIds = new Set<String>();
+        for (ShopifyOrder order : orders) {
+            shopifyIds.add(order.shopifyId());
+        }
+        Map<String, Order> storedByShopifyId = new Map<String, Order>();
+        for (Order stored : [
+            SELECT Id, Shopify_Order_Id__c, Shopify_Updated_At__c
+            FROM Order
+            WHERE Shopify_Order_Id__c IN :shopifyIds
+        ]) {
+            storedByShopifyId.put(stored.Shopify_Order_Id__c, stored);
+        }
+        return storedByShopifyId;
     }
 
     // Customers are matched by email; orders without one get their own Account and Contact
@@ -181,17 +213,9 @@ public without sharing class ShopifyOrderService {
 
     private Map<String, Order> upsertOrderHeaders(
         List<ShopifyOrder> orders,
+        Map<String, Order> storedByShopifyId,
         Map<String, Contact> contactsByCustomerKey
     ) {
-        Set<String> shopifyIds = new Set<String>();
-        for (ShopifyOrder order : orders) {
-            shopifyIds.add(order.shopifyId());
-        }
-        Set<String> existingIds = new Set<String>();
-        for (Order existing : [SELECT Shopify_Order_Id__c FROM Order WHERE Shopify_Order_Id__c IN :shopifyIds]) {
-            existingIds.add(existing.Shopify_Order_Id__c);
-        }
-
         Map<String, Order> ordersByShopifyId = new Map<String, Order>();
         for (ShopifyOrder order : orders) {
             Contact customer = contactsByCustomerKey.get(customerKey(order));
@@ -205,13 +229,16 @@ public without sharing class ShopifyOrderService {
                 EffectiveDate = order.processedDate(),
                 Financial_Status__c = order.financial_status,
                 Shopify_Fulfillment_Status__c = order.fulfillment_status ?? UNFULFILLED,
-                Shopify_Total_Price__c = ShopifyOrder.toAmount(order.total_price),
+                Shopify_Order_Status__c = order.orderStatus(),
+                Cancelled_At__c = order.cancelledAt(),
+                Cancel_Reason__c = order.cancel_reason,
+                Shopify_Total_Price__c = order.currentTotal(),
                 Shopify_Updated_At__c = order.updatedAt()
             );
             setAddress(record, 'Billing', order.billing_address);
             setAddress(record, 'Shipping', order.shipping_address);
             // Status and price book are set on creation only; they are managed in Salesforce afterwards
-            if (!existingIds.contains(order.shopifyId())) {
+            if (!storedByShopifyId.containsKey(order.shopifyId())) {
                 record.Status = NEW_ORDER_STATUS;
                 record.Pricebook2Id = pricebookId;
             }
@@ -238,7 +265,7 @@ public without sharing class ShopifyOrderService {
         record.put(prefix + 'StateCode', stateCode);
     }
 
-    private void upsertOrderItems(
+    private void insertOrderItems(
         List<ShopifyOrder> orders,
         Map<String, Order> ordersByShopifyId,
         Map<String, Id> entryIdsByProductKey
@@ -273,29 +300,7 @@ public without sharing class ShopifyOrderService {
                 );
             }
         }
-        if (itemsByLineId.isEmpty()) {
-            return;
-        }
-
-        // OrderId and PricebookEntryId cannot be updated, so they are only sent for new lines
-        for (OrderItem existing : [
-            SELECT Shopify_Line_Item_Id__c
-            FROM OrderItem
-            WHERE Shopify_Line_Item_Id__c IN :itemsByLineId.keySet()
-        ]) {
-            OrderItem item = itemsByLineId.get(existing.Shopify_Line_Item_Id__c);
-            itemsByLineId.put(
-                existing.Shopify_Line_Item_Id__c,
-                new OrderItem(
-                    Shopify_Line_Item_Id__c = item.Shopify_Line_Item_Id__c,
-                    Variant_Title__c = item.Variant_Title__c,
-                    Description = item.Description,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.UnitPrice
-                )
-            );
-        }
-        upsert itemsByLineId.values() OrderItem.Shopify_Line_Item_Id__c;
+        insert itemsByLineId.values();
     }
 
     private static Id standardPricebookId() {

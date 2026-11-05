@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Status__c</fullName>
     <inlineHelpText
-    >Pending: verified and waiting to be processed. Skipped: the event was ignored because Salesforce already holds a newer version of the record.</inlineHelpText>
+    >Pending: verified and waiting to be processed. Skipped: the event was ignored (see Error Message), e.g. because Salesforce already holds a newer version of the record or the topic has no handler.</inlineHelpText>
     <label>Status</label>
     <required>true</required>
     <trackTrending>false</trackTrending>

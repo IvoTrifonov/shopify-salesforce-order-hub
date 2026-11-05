@@ -1,6 +1,11 @@
 /**
- * Test data built from the anonymized orders/create payload in the
- * ShopifyOrderCreateFixture static resource.
+ * Test data built from the anonymized webhook payloads in the Shopify*Fixture
+ * static resources. ShopifyOrderCreateFixture is the default order.
+ *
+ * The orders/updated fixtures are real deliveries from the dev store:
+ * - Fulfilled: order #1005 (paid at checkout) after it was fulfilled, and with it closed
+ * - Paid and Edited: order #1006 marked as paid, then edited to quantity 2 (now partially paid)
+ * - Cancelled: order #1007 (payment pending) after it was cancelled by the customer
  */
 @IsTest
 public class ShopifyTestData {
@@ -9,13 +14,40 @@ public class ShopifyTestData {
     public static final String FIXTURE_ORDER_ID = '17345318027345';
     public static final String FIXTURE_EMAIL = 'jane.doe@example.com';
 
-    private static String fixture;
+    public static final String UPDATED_FULFILLED = 'ShopifyOrderUpdatedFulfilledFixture';
+    public static final String UPDATED_PAID = 'ShopifyOrderUpdatedPaidFixture';
+    public static final String UPDATED_EDITED = 'ShopifyOrderUpdatedEditedFixture';
+    public static final String UPDATED_CANCELLED = 'ShopifyOrderUpdatedCancelledFixture';
+
+    private static Map<String, String> fixtures = new Map<String, String>();
 
     public static String orderPayload() {
-        if (fixture == null) {
-            fixture = [SELECT Body FROM StaticResource WHERE Name = 'ShopifyOrderCreateFixture'].Body.toString();
+        return payload('ShopifyOrderCreateFixture');
+    }
+
+    public static String payload(String fixtureName) {
+        if (!fixtures.containsKey(fixtureName)) {
+            fixtures.put(fixtureName, [SELECT Body FROM StaticResource WHERE Name = :fixtureName].Body.toString());
         }
-        return fixture;
+        return fixtures.get(fixtureName);
+    }
+
+    public static Map<String, Object> orderMap(String fixtureName) {
+        return (Map<String, Object>) JSON.deserializeUntyped(payload(fixtureName));
+    }
+
+    /**
+     * The order of the given fixture as it was before: open, not cancelled and with an earlier updated_at.
+     */
+    public static Map<String, Object> earlierVersion(String fixtureName) {
+        Map<String, Object> order = orderMap(fixtureName);
+        order.put('updated_at', '2026-11-01T08:00:00-05:00');
+        order.put('closed_at', null);
+        order.put('cancelled_at', null);
+        order.put('cancel_reason', null);
+        order.put('fulfillment_status', null);
+        order.put('current_total_price', order.get('total_price'));
+        return order;
     }
 
     public static Map<String, Object> orderMap() {
@@ -48,11 +80,44 @@ public class ShopifyTestData {
         update new Pricebook2(Id = Test.getStandardPricebookId(), IsActive = true);
     }
 
+    /**
+     * A user whose only access comes from the given permission set, to run code as the
+     * integration or guest user would (Minimum Access profile).
+     */
+    public static User restrictedUser(String permissionSetName) {
+        User user = new User(
+            ProfileId = [SELECT Id FROM Profile WHERE Name = 'Minimum Access - Salesforce']
+            .Id,
+            LastName = 'Restricted',
+            Alias = 'restrict',
+            Email = 'restricted@example.com',
+            Username = 'restricted.' + Crypto.getRandomInteger() + '@orderhub.test',
+            TimeZoneSidKey = 'America/New_York',
+            LocaleSidKey = 'en_US',
+            EmailEncodingKey = 'UTF-8',
+            LanguageLocaleKey = 'en_US'
+        );
+        // Setup objects (User, PermissionSetAssignment) can't share a transaction with other DML
+        System.runAs(new User(Id = UserInfo.getUserId())) {
+            insert user;
+            insert new PermissionSetAssignment(
+                AssigneeId = user.Id,
+                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = :permissionSetName]
+                .Id
+            );
+        }
+        return user;
+    }
+
     public static Sync_Log__c pendingLog(String payload) {
+        return pendingLog(payload, 'orders/create');
+    }
+
+    public static Sync_Log__c pendingLog(String payload, String topic) {
         Sync_Log__c log = new Sync_Log__c(
             Direction__c = 'Inbound',
             Status__c = 'Pending',
-            Event_Topic__c = 'orders/create',
+            Event_Topic__c = topic,
             Payload__c = payload
         );
         insert log;

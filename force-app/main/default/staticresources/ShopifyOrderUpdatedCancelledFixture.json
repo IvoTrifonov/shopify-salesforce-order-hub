@@ -1,0 +1,701 @@
+{
+  "id": 17353187655761,
+  "admin_graphql_api_id": "gid://shopify/Order/17353187655761",
+  "app_id": 1354745,
+  "browser_ip": "203.0.113.10",
+  "buyer_accepts_marketing": true,
+  "cancel_reason": "customer",
+  "cancelled_at": "2026-11-01T12:19:12-05:00",
+  "cart_token": null,
+  "checkout_token": "0000",
+  "client_details": {
+    "accept_language": null,
+    "browser_height": null,
+    "browser_ip": "203.0.113.10",
+    "browser_width": null,
+    "session_hash": null,
+    "user_agent": "Mozilla/5.0"
+  },
+  "closed_at": "2026-11-01T12:19:12-05:00",
+  "company": null,
+  "confirmation_number": "TESTCONF1",
+  "confirmed": true,
+  "contact_email": "jane.doe@example.com",
+  "created_at": "2026-11-01T12:16:45-05:00",
+  "currency": "USD",
+  "current_shipping_price_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "current_subtotal_price": "0.00",
+  "current_subtotal_price_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "current_total_additional_fees_set": null,
+  "current_total_discounts": "0.00",
+  "current_total_discounts_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "current_total_duties_set": null,
+  "current_total_price": "0.00",
+  "current_total_price_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "current_total_tax": "0.00",
+  "current_total_tax_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "customer_locale": "en",
+  "device_id": null,
+  "discount_codes": [],
+  "duties_included": false,
+  "email": "jane.doe@example.com",
+  "estimated_taxes": false,
+  "financial_status": "pending",
+  "fulfillment_status": null,
+  "landing_site": null,
+  "landing_site_ref": null,
+  "location_id": null,
+  "merchant_business_entity_id": "39393820753",
+  "merchant_of_record_app_id": null,
+  "name": "#1007",
+  "note": null,
+  "note_attributes": [],
+  "number": 7,
+  "order_number": 1007,
+  "order_status_url": "https://example.com/orders/0000/authenticate?key=0000",
+  "original_total_additional_fees_set": null,
+  "original_total_duties_set": null,
+  "payment_gateway_names": [],
+  "phone": "+15555550100",
+  "po_number": null,
+  "presentment_currency": "USD",
+  "processed_at": "2026-11-01T12:16:44-05:00",
+  "reference": null,
+  "referring_site": null,
+  "source_identifier": null,
+  "source_name": "shopify_draft_order",
+  "source_url": null,
+  "subtotal_price": "59.97",
+  "subtotal_price_set": {
+    "shop_money": {
+      "amount": "59.97",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "59.97",
+      "currency_code": "USD"
+    }
+  },
+  "tags": "",
+  "tax_exempt": false,
+  "tax_lines": [],
+  "taxes_included": false,
+  "test": false,
+  "token": "0000",
+  "total_cash_rounding_payment_adjustment_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_cash_rounding_refund_adjustment_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_discounts": "0.00",
+  "total_discounts_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_line_items_price": "59.97",
+  "total_line_items_price_set": {
+    "shop_money": {
+      "amount": "59.97",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "59.97",
+      "currency_code": "USD"
+    }
+  },
+  "total_outstanding": "0.00",
+  "total_price": "59.97",
+  "total_price_set": {
+    "shop_money": {
+      "amount": "59.97",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "59.97",
+      "currency_code": "USD"
+    }
+  },
+  "total_shipping_price_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_tax": "0.00",
+  "total_tax_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_tip_received": "0.00",
+  "total_weight": 450,
+  "updated_at": "2026-11-01T12:19:12-05:00",
+  "user_id": 152554143825,
+  "billing_address": {
+    "first_name": "Jane",
+    "address1": "123 Main St",
+    "phone": "+15555550100",
+    "city": "Springfield",
+    "zip": "62701",
+    "province": "Illinois",
+    "country": "United States",
+    "last_name": "Doe",
+    "address2": null,
+    "company": null,
+    "latitude": null,
+    "longitude": null,
+    "name": "Jane Doe",
+    "country_code": "US",
+    "province_code": "IL"
+  },
+  "customer": {
+    "id": 27700482998353,
+    "created_at": "2026-11-01T12:04:30-05:00",
+    "updated_at": "2026-11-01T12:16:45-05:00",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "state": "disabled",
+    "note": null,
+    "verified_email": true,
+    "multipass_identifier": null,
+    "tax_exempt": false,
+    "email": "jane.doe@example.com",
+    "phone": "+15555550100",
+    "currency": "USD",
+    "tax_exemptions": [],
+    "admin_graphql_api_id": "gid://shopify/Customer/27700482998353",
+    "default_address": {
+      "id": 38412036571217,
+      "customer_id": 27700482998353,
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "company": null,
+      "address1": "123 Main St",
+      "address2": null,
+      "city": "Springfield",
+      "province": "Illinois",
+      "country": "United States",
+      "zip": "62701",
+      "phone": "+15555550100",
+      "name": "Jane Doe",
+      "province_code": "IL",
+      "country_code": "US",
+      "country_name": "United States",
+      "default": true
+    }
+  },
+  "discount_applications": [],
+  "fulfillments": [],
+  "line_items": [
+    {
+      "id": 46494496555089,
+      "admin_graphql_api_id": "gid://shopify/LineItem/46494496555089",
+      "attributed_staffs": [],
+      "current_quantity": 0,
+      "fulfillable_quantity": 0,
+      "fulfillment_service": "manual",
+      "fulfillment_status": null,
+      "gift_card": false,
+      "grams": 150,
+      "name": "Physical Product “The Band” T-Shirt - Small / green",
+      "price": "19.99",
+      "price_set": {
+        "shop_money": {
+          "amount": "19.99",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "19.99",
+          "currency_code": "USD"
+        }
+      },
+      "product_exists": true,
+      "product_id": 15915810324561,
+      "properties": [],
+      "quantity": 1,
+      "requires_shipping": true,
+      "sales_line_item_group_id": null,
+      "selling_plan_id": null,
+      "sku": "TheBandTShirt-SG",
+      "taxable": true,
+      "title": "Physical Product “The Band” T-Shirt",
+      "total_discount": "0.00",
+      "total_discount_set": {
+        "shop_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        }
+      },
+      "variant_id": 59824585736273,
+      "variant_inventory_management": "shopify",
+      "variant_title": "Small / green",
+      "vendor": "Harmony Threads",
+      "tax_lines": [],
+      "duties": [],
+      "discount_allocations": []
+    },
+    {
+      "id": 46494496587857,
+      "admin_graphql_api_id": "gid://shopify/LineItem/46494496587857",
+      "attributed_staffs": [],
+      "current_quantity": 0,
+      "fulfillable_quantity": 0,
+      "fulfillment_service": "manual",
+      "fulfillment_status": null,
+      "gift_card": false,
+      "grams": 150,
+      "name": "Physical Product “The Band” T-Shirt - Small / gray",
+      "price": "19.99",
+      "price_set": {
+        "shop_money": {
+          "amount": "19.99",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "19.99",
+          "currency_code": "USD"
+        }
+      },
+      "product_exists": true,
+      "product_id": 15915810324561,
+      "properties": [],
+      "quantity": 1,
+      "requires_shipping": true,
+      "sales_line_item_group_id": null,
+      "selling_plan_id": null,
+      "sku": "TheBandTShirt-SA",
+      "taxable": true,
+      "title": "Physical Product “The Band” T-Shirt",
+      "total_discount": "0.00",
+      "total_discount_set": {
+        "shop_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        }
+      },
+      "variant_id": 59824585769041,
+      "variant_inventory_management": "shopify",
+      "variant_title": "Small / gray",
+      "vendor": "Harmony Threads",
+      "tax_lines": [],
+      "duties": [],
+      "discount_allocations": []
+    },
+    {
+      "id": 46494496620625,
+      "admin_graphql_api_id": "gid://shopify/LineItem/46494496620625",
+      "attributed_staffs": [],
+      "current_quantity": 0,
+      "fulfillable_quantity": 0,
+      "fulfillment_service": "manual",
+      "fulfillment_status": null,
+      "gift_card": false,
+      "grams": 150,
+      "name": "Physical Product “The Band” T-Shirt - Small / red",
+      "price": "19.99",
+      "price_set": {
+        "shop_money": {
+          "amount": "19.99",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "19.99",
+          "currency_code": "USD"
+        }
+      },
+      "product_exists": true,
+      "product_id": 15915810324561,
+      "properties": [],
+      "quantity": 1,
+      "requires_shipping": true,
+      "sales_line_item_group_id": null,
+      "selling_plan_id": null,
+      "sku": "TheBandTShirt-SR",
+      "taxable": true,
+      "title": "Physical Product “The Band” T-Shirt",
+      "total_discount": "0.00",
+      "total_discount_set": {
+        "shop_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        }
+      },
+      "variant_id": 59824585801809,
+      "variant_inventory_management": "shopify",
+      "variant_title": "Small / red",
+      "vendor": "Harmony Threads",
+      "tax_lines": [],
+      "duties": [],
+      "discount_allocations": []
+    }
+  ],
+  "payment_terms": null,
+  "refunds": [
+    {
+      "id": 1227305418833,
+      "admin_graphql_api_id": "gid://shopify/Refund/1227305418833",
+      "created_at": "2026-11-01T12:19:11-05:00",
+      "note": null,
+      "order_id": 17353187655761,
+      "processed_at": "2026-11-01T12:19:11-05:00",
+      "restock": true,
+      "total_duties_set": {
+        "shop_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        }
+      },
+      "user_id": 152554143825,
+      "order_adjustments": [],
+      "transactions": [],
+      "refund_line_items": [
+        {
+          "id": 1209687834705,
+          "line_item_id": 46494496555089,
+          "location_id": 121873924177,
+          "quantity": 1,
+          "restock_type": "cancel",
+          "subtotal": 19.99,
+          "subtotal_set": {
+            "shop_money": {
+              "amount": "19.99",
+              "currency_code": "USD"
+            },
+            "presentment_money": {
+              "amount": "19.99",
+              "currency_code": "USD"
+            }
+          },
+          "total_tax": 0,
+          "total_tax_set": {
+            "shop_money": {
+              "amount": "0.00",
+              "currency_code": "USD"
+            },
+            "presentment_money": {
+              "amount": "0.00",
+              "currency_code": "USD"
+            }
+          },
+          "line_item": {
+            "id": 46494496555089,
+            "admin_graphql_api_id": "gid://shopify/LineItem/46494496555089",
+            "attributed_staffs": [],
+            "current_quantity": 0,
+            "fulfillable_quantity": 0,
+            "fulfillment_service": "manual",
+            "fulfillment_status": null,
+            "gift_card": false,
+            "grams": 150,
+            "name": "Physical Product “The Band” T-Shirt - Small / green",
+            "price": "19.99",
+            "price_set": {
+              "shop_money": {
+                "amount": "19.99",
+                "currency_code": "USD"
+              },
+              "presentment_money": {
+                "amount": "19.99",
+                "currency_code": "USD"
+              }
+            },
+            "product_exists": true,
+            "product_id": 15915810324561,
+            "properties": [],
+            "quantity": 1,
+            "requires_shipping": true,
+            "sku": "TheBandTShirt-SG",
+            "taxable": true,
+            "title": "Physical Product “The Band” T-Shirt",
+            "total_discount": "0.00",
+            "total_discount_set": {
+              "shop_money": {
+                "amount": "0.00",
+                "currency_code": "USD"
+              },
+              "presentment_money": {
+                "amount": "0.00",
+                "currency_code": "USD"
+              }
+            },
+            "variant_id": 59824585736273,
+            "variant_inventory_management": "shopify",
+            "variant_title": "Small / green",
+            "vendor": "Harmony Threads",
+            "tax_lines": [],
+            "duties": [],
+            "discount_allocations": []
+          }
+        },
+        {
+          "id": 1209687867473,
+          "line_item_id": 46494496587857,
+          "location_id": 121873924177,
+          "quantity": 1,
+          "restock_type": "cancel",
+          "subtotal": 19.99,
+          "subtotal_set": {
+            "shop_money": {
+              "amount": "19.99",
+              "currency_code": "USD"
+            },
+            "presentment_money": {
+              "amount": "19.99",
+              "currency_code": "USD"
+            }
+          },
+          "total_tax": 0,
+          "total_tax_set": {
+            "shop_money": {
+              "amount": "0.00",
+              "currency_code": "USD"
+            },
+            "presentment_money": {
+              "amount": "0.00",
+              "currency_code": "USD"
+            }
+          },
+          "line_item": {
+            "id": 46494496587857,
+            "admin_graphql_api_id": "gid://shopify/LineItem/46494496587857",
+            "attributed_staffs": [],
+            "current_quantity": 0,
+            "fulfillable_quantity": 0,
+            "fulfillment_service": "manual",
+            "fulfillment_status": null,
+            "gift_card": false,
+            "grams": 150,
+            "name": "Physical Product “The Band” T-Shirt - Small / gray",
+            "price": "19.99",
+            "price_set": {
+              "shop_money": {
+                "amount": "19.99",
+                "currency_code": "USD"
+              },
+              "presentment_money": {
+                "amount": "19.99",
+                "currency_code": "USD"
+              }
+            },
+            "product_exists": true,
+            "product_id": 15915810324561,
+            "properties": [],
+            "quantity": 1,
+            "requires_shipping": true,
+            "sku": "TheBandTShirt-SA",
+            "taxable": true,
+            "title": "Physical Product “The Band” T-Shirt",
+            "total_discount": "0.00",
+            "total_discount_set": {
+              "shop_money": {
+                "amount": "0.00",
+                "currency_code": "USD"
+              },
+              "presentment_money": {
+                "amount": "0.00",
+                "currency_code": "USD"
+              }
+            },
+            "variant_id": 59824585769041,
+            "variant_inventory_management": "shopify",
+            "variant_title": "Small / gray",
+            "vendor": "Harmony Threads",
+            "tax_lines": [],
+            "duties": [],
+            "discount_allocations": []
+          }
+        },
+        {
+          "id": 1209687900241,
+          "line_item_id": 46494496620625,
+          "location_id": 121873924177,
+          "quantity": 1,
+          "restock_type": "cancel",
+          "subtotal": 19.99,
+          "subtotal_set": {
+            "shop_money": {
+              "amount": "19.99",
+              "currency_code": "USD"
+            },
+            "presentment_money": {
+              "amount": "19.99",
+              "currency_code": "USD"
+            }
+          },
+          "total_tax": 0,
+          "total_tax_set": {
+            "shop_money": {
+              "amount": "0.00",
+              "currency_code": "USD"
+            },
+            "presentment_money": {
+              "amount": "0.00",
+              "currency_code": "USD"
+            }
+          },
+          "line_item": {
+            "id": 46494496620625,
+            "admin_graphql_api_id": "gid://shopify/LineItem/46494496620625",
+            "attributed_staffs": [],
+            "current_quantity": 0,
+            "fulfillable_quantity": 0,
+            "fulfillment_service": "manual",
+            "fulfillment_status": null,
+            "gift_card": false,
+            "grams": 150,
+            "name": "Physical Product “The Band” T-Shirt - Small / red",
+            "price": "19.99",
+            "price_set": {
+              "shop_money": {
+                "amount": "19.99",
+                "currency_code": "USD"
+              },
+              "presentment_money": {
+                "amount": "19.99",
+                "currency_code": "USD"
+              }
+            },
+            "product_exists": true,
+            "product_id": 15915810324561,
+            "properties": [],
+            "quantity": 1,
+            "requires_shipping": true,
+            "sku": "TheBandTShirt-SR",
+            "taxable": true,
+            "title": "Physical Product “The Band” T-Shirt",
+            "total_discount": "0.00",
+            "total_discount_set": {
+              "shop_money": {
+                "amount": "0.00",
+                "currency_code": "USD"
+              },
+              "presentment_money": {
+                "amount": "0.00",
+                "currency_code": "USD"
+              }
+            },
+            "variant_id": 59824585801809,
+            "variant_inventory_management": "shopify",
+            "variant_title": "Small / red",
+            "vendor": "Harmony Threads",
+            "tax_lines": [],
+            "duties": [],
+            "discount_allocations": []
+          }
+        }
+      ],
+      "duties": []
+    }
+  ],
+  "shipping_address": {
+    "first_name": "Jane",
+    "address1": "123 Main St",
+    "phone": "+15555550100",
+    "city": "Springfield",
+    "zip": "62701",
+    "province": "Illinois",
+    "country": "United States",
+    "last_name": "Doe",
+    "address2": null,
+    "company": null,
+    "latitude": null,
+    "longitude": null,
+    "name": "Jane Doe",
+    "country_code": "US",
+    "province_code": "IL"
+  },
+  "shipping_lines": [],
+  "returns": [],
+  "line_item_groups": []
+}

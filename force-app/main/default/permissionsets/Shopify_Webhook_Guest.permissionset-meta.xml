@@ -31,6 +31,11 @@
         <field>Sync_Log__c.Shopify_Reference__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Sync_Log__c.Webhook_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Shopify Webhook Guest</label>
     <objectPermissions>

@@ -1,0 +1,360 @@
+{
+  "id": 17353173139537,
+  "admin_graphql_api_id": "gid://shopify/Order/17353173139537",
+  "app_id": 1354745,
+  "browser_ip": "203.0.113.10",
+  "buyer_accepts_marketing": true,
+  "cancel_reason": null,
+  "cancelled_at": null,
+  "cart_token": null,
+  "checkout_token": "0000",
+  "client_details": {
+    "accept_language": null,
+    "browser_height": null,
+    "browser_ip": "203.0.113.10",
+    "browser_width": null,
+    "session_hash": null,
+    "user_agent": "Mozilla/5.0"
+  },
+  "closed_at": null,
+  "company": null,
+  "confirmation_number": "TESTCONF1",
+  "confirmed": true,
+  "contact_email": "jane.doe@example.com",
+  "created_at": "2026-11-01T12:07:45-05:00",
+  "currency": "USD",
+  "current_shipping_price_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "current_subtotal_price": "149.98",
+  "current_subtotal_price_set": {
+    "shop_money": {
+      "amount": "149.98",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "149.98",
+      "currency_code": "USD"
+    }
+  },
+  "current_total_additional_fees_set": null,
+  "current_total_discounts": "0.00",
+  "current_total_discounts_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "current_total_duties_set": null,
+  "current_total_price": "149.98",
+  "current_total_price_set": {
+    "shop_money": {
+      "amount": "149.98",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "149.98",
+      "currency_code": "USD"
+    }
+  },
+  "current_total_tax": "0.00",
+  "current_total_tax_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "customer_locale": "en",
+  "device_id": null,
+  "discount_codes": [],
+  "duties_included": false,
+  "email": "jane.doe@example.com",
+  "estimated_taxes": false,
+  "financial_status": "partially_paid",
+  "fulfillment_status": null,
+  "landing_site": null,
+  "landing_site_ref": null,
+  "location_id": null,
+  "merchant_business_entity_id": "39393820753",
+  "merchant_of_record_app_id": null,
+  "name": "#1006",
+  "note": null,
+  "note_attributes": [],
+  "number": 6,
+  "order_number": 1006,
+  "order_status_url": "https://example.com/orders/0000/authenticate?key=0000",
+  "original_total_additional_fees_set": null,
+  "original_total_duties_set": null,
+  "payment_gateway_names": [
+    "manual"
+  ],
+  "phone": "+15555550100",
+  "po_number": null,
+  "presentment_currency": "USD",
+  "processed_at": "2026-11-01T12:07:44-05:00",
+  "reference": null,
+  "referring_site": null,
+  "source_identifier": null,
+  "source_name": "shopify_draft_order",
+  "source_url": null,
+  "subtotal_price": "149.98",
+  "subtotal_price_set": {
+    "shop_money": {
+      "amount": "149.98",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "149.98",
+      "currency_code": "USD"
+    }
+  },
+  "tags": "",
+  "tax_exempt": false,
+  "tax_lines": [],
+  "taxes_included": false,
+  "test": false,
+  "token": "0000",
+  "total_cash_rounding_payment_adjustment_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_cash_rounding_refund_adjustment_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_discounts": "0.00",
+  "total_discounts_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_line_items_price": "149.98",
+  "total_line_items_price_set": {
+    "shop_money": {
+      "amount": "149.98",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "149.98",
+      "currency_code": "USD"
+    }
+  },
+  "total_outstanding": "74.99",
+  "total_price": "149.98",
+  "total_price_set": {
+    "shop_money": {
+      "amount": "149.98",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "149.98",
+      "currency_code": "USD"
+    }
+  },
+  "total_shipping_price_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_tax": "0.00",
+  "total_tax_set": {
+    "shop_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    },
+    "presentment_money": {
+      "amount": "0.00",
+      "currency_code": "USD"
+    }
+  },
+  "total_tip_received": "0.00",
+  "total_weight": 1000,
+  "updated_at": "2026-11-01T12:11:49-05:00",
+  "user_id": 152554143825,
+  "billing_address": {
+    "first_name": "Jane",
+    "address1": "123 Main St",
+    "phone": "+15555550100",
+    "city": "Springfield",
+    "zip": "62701",
+    "province": "Illinois",
+    "country": "United States",
+    "last_name": "Doe",
+    "address2": null,
+    "company": null,
+    "latitude": null,
+    "longitude": null,
+    "name": "Jane Doe",
+    "country_code": "US",
+    "province_code": "IL"
+  },
+  "customer": {
+    "id": 27700482998353,
+    "created_at": "2026-11-01T12:04:30-05:00",
+    "updated_at": "2026-11-01T12:07:45-05:00",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "state": "disabled",
+    "note": null,
+    "verified_email": true,
+    "multipass_identifier": null,
+    "tax_exempt": false,
+    "email": "jane.doe@example.com",
+    "phone": "+15555550100",
+    "currency": "USD",
+    "tax_exemptions": [],
+    "admin_graphql_api_id": "gid://shopify/Customer/27700482998353",
+    "default_address": {
+      "id": 38412036571217,
+      "customer_id": 27700482998353,
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "company": null,
+      "address1": "123 Main St",
+      "address2": null,
+      "city": "Springfield",
+      "province": "Illinois",
+      "country": "United States",
+      "zip": "62701",
+      "phone": "+15555550100",
+      "name": "Jane Doe",
+      "province_code": "IL",
+      "country_code": "US",
+      "country_name": "United States",
+      "default": true
+    }
+  },
+  "discount_applications": [],
+  "fulfillments": [],
+  "line_items": [
+    {
+      "id": 46494465097809,
+      "admin_graphql_api_id": "gid://shopify/LineItem/46494465097809",
+      "attributed_staffs": [],
+      "current_quantity": 2,
+      "fulfillable_quantity": 2,
+      "fulfillment_service": "manual",
+      "fulfillment_status": null,
+      "gift_card": false,
+      "grams": 500,
+      "name": "Example Perfume - Premium",
+      "price": "74.99",
+      "price_set": {
+        "shop_money": {
+          "amount": "74.99",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "74.99",
+          "currency_code": "USD"
+        }
+      },
+      "product_exists": true,
+      "product_id": 15915810455633,
+      "properties": [],
+      "quantity": 2,
+      "requires_shipping": true,
+      "sales_line_item_group_id": null,
+      "selling_plan_id": null,
+      "sku": "EX-PERF-MEN",
+      "taxable": true,
+      "title": "Example Perfume",
+      "total_discount": "0.00",
+      "total_discount_set": {
+        "shop_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        },
+        "presentment_money": {
+          "amount": "0.00",
+          "currency_code": "USD"
+        }
+      },
+      "variant_id": 59824586260561,
+      "variant_inventory_management": null,
+      "variant_title": "Premium",
+      "vendor": "Acme",
+      "tax_lines": [],
+      "duties": [],
+      "discount_allocations": []
+    }
+  ],
+  "payment_terms": {
+    "id": 24002723921,
+    "created_at": "2026-11-01T12:07:45-05:00",
+    "due_in_days": null,
+    "payment_schedules": [
+      {
+        "id": 17463476305,
+        "amount": "74.99",
+        "currency": "USD",
+        "issued_at": null,
+        "due_at": "2026-11-01T12:11:50-05:00",
+        "completed_at": null,
+        "created_at": "2026-11-01T12:11:50-05:00",
+        "updated_at": "2026-11-01T12:11:50-05:00"
+      }
+    ],
+    "payment_terms_name": "Due on receipt",
+    "payment_terms_type": "receipt",
+    "updated_at": "2026-11-01T12:07:45-05:00"
+  },
+  "refunds": [],
+  "shipping_address": {
+    "first_name": "Jane",
+    "address1": "123 Main St",
+    "phone": "+15555550100",
+    "city": "Springfield",
+    "zip": "62701",
+    "province": "Illinois",
+    "country": "United States",
+    "last_name": "Doe",
+    "address2": null,
+    "company": null,
+    "latitude": null,
+    "longitude": null,
+    "name": "Jane Doe",
+    "country_code": "US",
+    "province_code": "IL"
+  },
+  "shipping_lines": [],
+  "returns": [],
+  "line_item_groups": []
+}

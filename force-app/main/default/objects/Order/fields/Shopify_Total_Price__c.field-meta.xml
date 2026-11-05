@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Shopify_Total_Price__c</fullName>
+    <inlineHelpText
+    >Shopify current_total_price: the order total after edits, refunds and cancellations.</inlineHelpText>
     <label>Shopify Total Price</label>
     <precision>18</precision>
     <required>false</required>

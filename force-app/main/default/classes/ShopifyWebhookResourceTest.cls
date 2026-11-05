@@ -91,6 +91,58 @@ private class ShopifyWebhookResourceTest {
     }
 
     @IsTest
+    static void storesOrdersUpdatedAsPending() {
+        RestResponse response = post(ORDER_PAYLOAD, sign(ORDER_PAYLOAD), 'orders/updated');
+
+        Assert.areEqual(200, response.statusCode);
+        Assert.areEqual('Pending', getOnlyLog().Status__c);
+    }
+
+    @IsTest
+    static void storesWebhookIdOfDelivery() {
+        post(ORDER_PAYLOAD, sign(ORDER_PAYLOAD), 'orders/updated', 'delivery-1');
+
+        Assert.areEqual('delivery-1', getOnlyLog().Webhook_Id__c);
+    }
+
+    @IsTest
+    static void acknowledgesRetriedDeliveryWithoutStoringItAgain() {
+        post(ORDER_PAYLOAD, sign(ORDER_PAYLOAD), 'orders/updated', 'delivery-1');
+
+        RestResponse retry = post(ORDER_PAYLOAD, sign(ORDER_PAYLOAD), 'orders/updated', 'delivery-1');
+
+        Assert.areEqual(200, retry.statusCode, 'Shopify must stop retrying');
+        Assert.areEqual('Pending', getOnlyLog().Status__c);
+    }
+
+    @IsTest
+    static void storesDistinctDeliveriesOfTheSameOrder() {
+        post(ORDER_PAYLOAD, sign(ORDER_PAYLOAD), 'orders/updated', 'delivery-1');
+        post(ORDER_PAYLOAD, sign(ORDER_PAYLOAD), 'orders/updated', 'delivery-2');
+
+        Assert.areEqual(2, [SELECT COUNT() FROM Sync_Log__c]);
+    }
+
+    // The Site guest user has only what Shopify_Webhook_Guest grants, enforced in user mode
+    @IsTest
+    static void storesAndDeduplicatesWithOnlyTheGuestPermissionSet() {
+        User guest = ShopifyTestData.restrictedUser('Shopify_Webhook_Guest');
+        RestResponse first;
+        RestResponse retry;
+
+        System.runAs(guest) {
+            first = post(ORDER_PAYLOAD, sign(ORDER_PAYLOAD), 'orders/updated', 'delivery-1');
+            retry = post(ORDER_PAYLOAD, sign(ORDER_PAYLOAD), 'orders/updated', 'delivery-1');
+        }
+
+        Assert.areEqual(200, first.statusCode);
+        Assert.areEqual(200, retry.statusCode);
+        Sync_Log__c log = getOnlyLog();
+        Assert.areEqual('Pending', log.Status__c, log.Error_Message__c ?? 'no error message');
+        Assert.areEqual('delivery-1', log.Webhook_Id__c);
+    }
+
+    @IsTest
     static void createsOrderFromVerifiedWebhook() {
         ShopifyTestData.activateStandardPricebook();
         String payload = ShopifyTestData.orderPayload();
@@ -139,10 +191,17 @@ private class ShopifyWebhookResourceTest {
     }
 
     private static RestResponse post(String body, String signature, String topic) {
+        return post(body, signature, topic, null);
+    }
+
+    private static RestResponse post(String body, String signature, String topic, String webhookId) {
         RestContext.request = newRequest(body);
         RestContext.request.headers.put(ShopifyWebhookResource.TOPIC_HEADER, topic);
         if (signature != null) {
             RestContext.request.headers.put(ShopifyWebhookResource.HMAC_HEADER, signature);
+        }
+        if (webhookId != null) {
+            RestContext.request.headers.put(ShopifyWebhookResource.WEBHOOK_ID_HEADER, webhookId);
         }
         RestContext.response = new RestResponse();
 
@@ -175,7 +234,8 @@ private class ShopifyWebhookResourceTest {
                 Shopify_Reference__c,
                 HTTP_Status_Code__c,
                 Payload__c,
-                Error_Message__c
+                Error_Message__c,
+                Webhook_Id__c
             FROM Sync_Log__c
         ];
         Assert.areEqual(1, logs.size(), 'Expected exactly one sync log');

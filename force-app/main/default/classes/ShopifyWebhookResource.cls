@@ -4,6 +4,8 @@
  * The endpoint only verifies, stores and acknowledges. Verified payloads are
  * stored in Sync_Log__c and processed by ShopifyWebhookProcessor via the
  * Shopify_Webhook__e Platform Event, outside the Site guest user context.
+ * A delivery Shopify sends again (same X-Shopify-Webhook-Id) is acknowledged
+ * without being stored or processed a second time.
  *
  * Runs `without sharing` because the caller is the Site guest user, who has no
  * access to Sync_Log__c records. Every request is authenticated by its HMAC
@@ -15,15 +17,21 @@ global without sharing class ShopifyWebhookResource {
     private static final String HMAC_HEADER = 'X-Shopify-Hmac-Sha256';
     @TestVisible
     private static final String TOPIC_HEADER = 'X-Shopify-Topic';
+    // Unique per delivery and kept when Shopify retries it
+    @TestVisible
+    private static final String WEBHOOK_ID_HEADER = 'X-Shopify-Webhook-Id';
 
     private static final Integer PAYLOAD_MAX_LENGTH = Sync_Log__c.Payload__c.getDescribe().getLength();
 
     @HttpPost
     global static void receive() {
         RestResponse response = RestContext.response;
+        Savepoint beforeRequest = Database.setSavepoint();
         try {
             handle(RestContext.request, response);
         } catch (Exception e) {
+            // Shopify retries after a 500; a log kept from this attempt would make the retry look like a duplicate
+            Database.rollback(beforeRequest);
             // An unhandled exception would return the Apex error and stack trace to a public caller
             response.statusCode = 500;
             response.responseBody = null;
@@ -53,27 +61,38 @@ global without sharing class ShopifyWebhookResource {
 
         String body = request.requestBody.toString();
         response.statusCode = 200;
-        if (!ShopifyWebhookProcessor.HANDLED_TOPICS.contains(topic)) {
-            String reason = 'No handler for topic ' + topic + '.';
-            insertLog(
-                topic,
-                extractShopifyId(body),
-                'Skipped',
-                response.statusCode,
-                body.left(PAYLOAD_MAX_LENGTH),
-                reason
-            );
-            return;
-        }
-        Sync_Log__c log = insertLog(
+        Boolean handled = ShopifyWebhookProcessor.HANDLED_TOPICS.contains(topic);
+        Sync_Log__c log = newLog(
             topic,
             extractShopifyId(body),
-            'Pending',
+            handled ? 'Pending' : 'Skipped',
             response.statusCode,
             body.left(PAYLOAD_MAX_LENGTH),
-            null
+            handled ? null : 'No handler for topic ' + topic + '.'
         );
-        publish(new Shopify_Webhook__e(Sync_Log_Id__c = log.Id, Topic__c = topic));
+        log.Webhook_Id__c = header(request, WEBHOOK_ID_HEADER);
+
+        Database.SaveResult result = Database.insert(log, false);
+        if (isDuplicateDelivery(result)) {
+            // Already stored by an earlier attempt; 200 stops Shopify from retrying it
+            return;
+        }
+        if (!result.isSuccess()) {
+            throw new DmlException(result.getErrors()[0].getMessage());
+        }
+        if (handled) {
+            publish(new Shopify_Webhook__e(Sync_Log_Id__c = log.Id, Topic__c = topic));
+        }
+    }
+
+    // Webhook_Id__c is the only unique field on Sync_Log__c; duplicate errors do not list their field
+    private static Boolean isDuplicateDelivery(Database.SaveResult result) {
+        for (Database.Error error : result.getErrors()) {
+            if (error.getStatusCode() == StatusCode.DUPLICATE_VALUE) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void publish(Shopify_Webhook__e event) {
@@ -124,7 +143,20 @@ global without sharing class ShopifyWebhookResource {
         String payload,
         String errorMessage
     ) {
-        Sync_Log__c log = new Sync_Log__c(
+        Sync_Log__c log = newLog(topic, shopifyReference, status, httpStatusCode, payload, errorMessage);
+        insert log;
+        return log;
+    }
+
+    private static Sync_Log__c newLog(
+        String topic,
+        String shopifyReference,
+        String status,
+        Integer httpStatusCode,
+        String payload,
+        String errorMessage
+    ) {
+        return new Sync_Log__c(
             Direction__c = 'Inbound',
             Event_Topic__c = topic,
             Shopify_Reference__c = shopifyReference,
@@ -133,7 +165,5 @@ global without sharing class ShopifyWebhookResource {
             Payload__c = payload,
             Error_Message__c = errorMessage
         );
-        insert log;
-        return log;
     }
 }

@@ -100,6 +100,48 @@ private class ShopifyOrderTest {
     }
 
     @IsTest
+    static void readsCancellationOfCancelledFixture() {
+        ShopifyOrder order = ShopifyOrder.parse(ShopifyTestData.payload(ShopifyTestData.UPDATED_CANCELLED));
+
+        Assert.areEqual('cancelled', order.orderStatus());
+        Assert.areEqual('customer', order.cancel_reason);
+        // 2026-11-01T12:19:12-05:00
+        Assert.areEqual(Datetime.newInstanceGmt(2026, 11, 1, 17, 19, 12), order.cancelledAt());
+        Assert.areEqual(0, order.currentTotal(), 'Cancelling sets the current total to zero');
+    }
+
+    @IsTest
+    static void isClosedButNotCancelledAfterFulfillment() {
+        ShopifyOrder order = ShopifyOrder.parse(ShopifyTestData.payload(ShopifyTestData.UPDATED_FULFILLED));
+
+        Assert.areEqual('closed', order.orderStatus());
+        Assert.isNull(order.cancelledAt());
+    }
+
+    @IsTest
+    static void isOpenWithoutClosedOrCancelledDate() {
+        Assert.areEqual('open', parse('{"id": 1}').orderStatus());
+    }
+
+    @IsTest
+    static void prefersCurrentTotalOverCheckoutTotal() {
+        Assert.areEqual(10, parse('{"id": 1, "total_price": "25.00", "current_total_price": "10.00"}').currentTotal());
+        Assert.areEqual(25, parse('{"id": 1, "total_price": "25.00"}').currentTotal());
+    }
+
+    @IsTest
+    static void comparesVersionsByUpdatedAt() {
+        ShopifyOrder order = parse('{"id": 1, "updated_at": "2026-11-01T12:00:00-05:00"}');
+        Datetime sameTime = Datetime.newInstanceGmt(2026, 11, 1, 17, 0, 0);
+
+        Assert.isTrue(order.isOlderThan(sameTime.addSeconds(1)));
+        Assert.isFalse(order.isOlderThan(sameTime), 'The same version is applied again');
+        Assert.isFalse(order.isOlderThan(sameTime.addSeconds(-1)));
+        Assert.isFalse(order.isOlderThan(null), 'An order without a stored version is never outdated');
+        Assert.isFalse(parse('{"id": 1}').isOlderThan(sameTime), 'A payload without updated_at is applied');
+    }
+
+    @IsTest
     static void joinsAddressLinesIntoStreet() {
         ShopifyOrder.Address address = new ShopifyOrder.Address();
         address.address1 = '123 Main St ';
