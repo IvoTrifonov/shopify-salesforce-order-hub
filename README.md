@@ -28,8 +28,16 @@ context: it links or creates the customer's Account and Contact by email,
 creates products and price book entries per variant, and upserts the Order
 and its lines using Shopify IDs as external IDs, making the operation
 idempotent. Shipping is stored as an order line so `Order.TotalAmount`
-matches Shopify's total. Out-of-order deliveries are ignored by comparing the
-payload's `updated_at` with `Order.Shopify_Updated_At__c`.
+matches Shopify's total at checkout.
+
+**Order updates.** `orders/updated` goes through the same path. Shopify owns
+the `Shopify_*` fields (payment, fulfillment, open / closed / cancelled,
+current total); `Order.Status` stays with the Salesforce back office and is
+never written by Shopify. Outdated deliveries are skipped by comparing the
+payload's `updated_at` with `Order.Shopify_Updated_At__c`, and retried
+deliveries are recognized by their `X-Shopify-Webhook-Id`. Updates change the
+order header only; lines are written when the order is created
+([ADR 0005](docs/decisions/0005-inbound-order-updates.md)).
 
 **Triggers.** Each object has one logic-free trigger that delegates to a
 handler extending `TriggerHandler`, which dispatches each trigger event to
@@ -52,11 +60,13 @@ sequenceDiagram
         participant O as ShopifyOrderService
     end
 
-    S->>R: POST orders/create (JSON + X-Shopify-Hmac-Sha256)
+    S->>R: POST orders/create or orders/updated (JSON + X-Shopify-Hmac-Sha256)
     R->>R: Verify HMAC signature
     alt invalid or missing signature
         R->>L: Insert Error log (payload not stored)
         R-->>S: 401
+    else already stored (same X-Shopify-Webhook-Id)
+        R-->>S: 200
     else valid signature
         R->>L: Insert Pending log with payload
         R->>B: Publish Shopify_Webhook__e (Sync_Log_Id__c)
@@ -67,9 +77,10 @@ sequenceDiagram
         P->>O: upsertOrders(orders)
         O->>O: Account + Contact (matched by email)
         O->>O: Product2 + PricebookEntry per variant
-        O->>O: Order + OrderItems (incl. shipping line)
-        O-->>P: Order Ids by Shopify order ID
-        P->>L: Mark Success (linked to Order) or Error (with reason)
+        O->>O: Skip versions older than the stored order
+        O->>O: Order header + OrderItems of new orders (incl. shipping line)
+        O-->>P: Stored Orders by Shopify order ID
+        P->>L: Mark Success, Skipped (outdated) or Error (with reason)
     end
 ```
 
@@ -103,16 +114,16 @@ which Apex must read to compute the HMAC, lives in the protected
 
 ## Data model
 
-| Object                    | Purpose                                                                            | Key fields                                                                                                                                                                                                                 |
-| ------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Order` (standard)        | Shopify order header                                                               | `Shopify_Order_Id__c` (external ID), `Shopify_Order_Name__c`, `Financial_Status__c`, `Shopify_Fulfillment_Status__c`, `Shopify_Total_Price__c`, `Customer_Email__c`, `Shopify_Updated_At__c`, billing and shipping address |
-| `OrderItem` (standard)    | Order line                                                                         | `Shopify_Line_Item_Id__c` (external ID), `Variant_Title__c`                                                                                                                                                                |
-| `Product2` (standard)     | Product variant                                                                    | `Shopify_Product_Id__c`, `Shopify_Variant_Id__c` (external ID)                                                                                                                                                             |
-| `Invoice__c`              | Invoice generated from an order                                                    | `Order__c`, `Status__c`, `Invoice_Date__c`, `Due_Date__c`, `Total_Amount__c`                                                                                                                                               |
-| `Sync_Log__c`             | Audit trail of every inbound/outbound sync                                         | `Direction__c`, `Status__c`, `Event_Topic__c`, `Shopify_Reference__c`, `HTTP_Status_Code__c`, `Retry_Count__c`, `Payload__c`, `Error_Message__c`, `Order__c`                                                               |
-| `Shopify_Webhook__e`      | Platform Event handing verified webhooks to the processor (published after commit) | `Sync_Log_Id__c`, `Topic__c`                                                                                                                                                                                               |
-| `Shopify_Settings__c`     | Protected hierarchy custom setting                                                 | `Webhook_Secret__c`                                                                                                                                                                                                        |
-| `Order_Status_Changed__e` | Platform Event driving outbound sync (published after commit)                      | `Order_Id__c`, `Shopify_Order_Id__c`, `Previous_Status__c`, `New_Status__c`                                                                                                                                                |
+| Object                    | Purpose                                                                            | Key fields                                                                                                                                                                                                                                                                                                   |
+| ------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Order` (standard)        | Shopify order header                                                               | `Shopify_Order_Id__c` (external ID), `Shopify_Order_Name__c`, `Financial_Status__c`, `Shopify_Fulfillment_Status__c`, `Shopify_Order_Status__c`, `Cancelled_At__c`, `Cancel_Reason__c`, `Shopify_Total_Price__c` (current total), `Customer_Email__c`, `Shopify_Updated_At__c`, billing and shipping address |
+| `OrderItem` (standard)    | Order line                                                                         | `Shopify_Line_Item_Id__c` (external ID), `Variant_Title__c`                                                                                                                                                                                                                                                  |
+| `Product2` (standard)     | Product variant                                                                    | `Shopify_Product_Id__c`, `Shopify_Variant_Id__c` (external ID)                                                                                                                                                                                                                                               |
+| `Invoice__c`              | Invoice generated from an order                                                    | `Order__c`, `Status__c`, `Invoice_Date__c`, `Due_Date__c`, `Total_Amount__c`                                                                                                                                                                                                                                 |
+| `Sync_Log__c`             | Audit trail of every inbound/outbound sync                                         | `Direction__c`, `Status__c`, `Event_Topic__c`, `Shopify_Reference__c`, `HTTP_Status_Code__c`, `Retry_Count__c`, `Payload__c`, `Error_Message__c`, `Order__c`, `Webhook_Id__c` (unique)                                                                                                                       |
+| `Shopify_Webhook__e`      | Platform Event handing verified webhooks to the processor (published after commit) | `Sync_Log_Id__c`, `Topic__c`                                                                                                                                                                                                                                                                                 |
+| `Shopify_Settings__c`     | Protected hierarchy custom setting                                                 | `Webhook_Secret__c`                                                                                                                                                                                                                                                                                          |
+| `Order_Status_Changed__e` | Platform Event driving outbound sync (published after commit)                      | `Order_Id__c`, `Shopify_Order_Id__c`, `Previous_Status__c`, `New_Status__c`                                                                                                                                                                                                                                  |
 
 Shopify status picklists use Shopify's own tokens as value API names (e.g.
 `partially_paid`). Back-office users get access through the `Order_Hub_Admin` permission set.
@@ -152,7 +163,9 @@ top of that working path.
 
 **Milestone 2: full sync**
 
-- [ ] `orders/updated` and `refunds/create` webhooks with out-of-order handling
+- [x] `orders/updated` webhook with out-of-order and duplicate handling
+- [ ] Order edits (line changes) from `orders/updated`
+- [ ] `refunds/create` webhook
 - [x] Invoice generation and Account/Contact matching
 - [ ] Outbound fulfillment sync (Platform Event → Queueable → GraphQL Admin API, with retry)
 - [ ] Custom Metadata configuration

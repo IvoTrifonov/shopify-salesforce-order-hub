@@ -7,7 +7,7 @@ private class ShopifyOrderServiceTest {
 
     @IsTest
     static void createsOrderWithCustomerProductsAndLines() {
-        Map<String, Id> orderIds = upsertOrders(
+        Map<String, Order> orders = upsertOrders(
             new List<ShopifyOrder>{ ShopifyOrder.parse(ShopifyTestData.orderPayload()) }
         );
 
@@ -27,9 +27,12 @@ private class ShopifyOrderServiceTest {
                 Financial_Status__c,
                 Shopify_Fulfillment_Status__c,
                 Shopify_Total_Price__c,
-                Shopify_Updated_At__c
+                Shopify_Updated_At__c,
+                Shopify_Order_Status__c,
+                Cancelled_At__c,
+                Cancel_Reason__c
             FROM Order
-            WHERE Id = :orderIds.get(ShopifyTestData.FIXTURE_ORDER_ID)
+            WHERE Id = :orders.get(ShopifyTestData.FIXTURE_ORDER_ID).Id
         ];
         Assert.areEqual('#1002', order.Name);
         Assert.areEqual('#1002', order.Shopify_Order_Name__c);
@@ -46,6 +49,9 @@ private class ShopifyOrderServiceTest {
         Assert.areEqual(order.Shopify_Total_Price__c, order.TotalAmount, 'Line items must add up to the Shopify total');
         // 2026-10-28T12:56:52-04:00
         Assert.areEqual(Datetime.newInstanceGmt(2026, 10, 28, 16, 56, 52), order.Shopify_Updated_At__c);
+        Assert.areEqual('open', order.Shopify_Order_Status__c);
+        Assert.isNull(order.Cancelled_At__c);
+        Assert.isNull(order.Cancel_Reason__c);
 
         List<OrderItem> items = [
             SELECT Quantity, UnitPrice, Variant_Title__c, Description, Product2.Name, Product2.Shopify_Variant_Id__c
@@ -92,6 +98,103 @@ private class ShopifyOrderServiceTest {
         Order order = [SELECT Status, Financial_Status__c FROM Order];
         Assert.areEqual('Activated', order.Status);
         Assert.areEqual('refunded', order.Financial_Status__c);
+    }
+
+    @IsTest
+    static void appliesShopifyChangesToActivatedOrderWithoutTouchingLines() {
+        upsertOrders(new List<ShopifyOrder>{ fixtureOrder(ShopifyTestData.UPDATED_PAID) });
+        Order existing = [SELECT Id FROM Order];
+        existing.Status = 'Activated';
+        update existing;
+
+        upsertOrders(new List<ShopifyOrder>{ fixtureOrder(ShopifyTestData.UPDATED_EDITED) });
+
+        Order order = [
+            SELECT
+                Status,
+                Financial_Status__c,
+                Shopify_Order_Status__c,
+                Shopify_Total_Price__c,
+                TotalAmount,
+                (SELECT Quantity FROM OrderItems)
+            FROM Order
+        ];
+        Assert.areEqual('Activated', order.Status, 'Order.Status is owned by Salesforce');
+        Assert.areEqual('partially_paid', order.Financial_Status__c);
+        Assert.areEqual('open', order.Shopify_Order_Status__c);
+        Assert.areEqual(149.98, order.Shopify_Total_Price__c);
+        Assert.areEqual(1, order.OrderItems.size());
+        Assert.areEqual(1, order.OrderItems[0].Quantity, 'Order edits are not synced to lines yet');
+        Assert.areEqual(74.99, order.TotalAmount);
+    }
+
+    @IsTest
+    static void recordsCancellationFromShopify() {
+        upsertOrders(
+            new List<ShopifyOrder>{
+                ShopifyTestData.order(ShopifyTestData.earlierVersion(ShopifyTestData.UPDATED_CANCELLED))
+            }
+        );
+
+        upsertOrders(new List<ShopifyOrder>{ fixtureOrder(ShopifyTestData.UPDATED_CANCELLED) });
+
+        Order order = [
+            SELECT
+                Status,
+                Shopify_Order_Status__c,
+                Cancelled_At__c,
+                Cancel_Reason__c,
+                Shopify_Total_Price__c,
+                TotalAmount,
+                (SELECT Id FROM OrderItems)
+            FROM Order
+        ];
+        Assert.areEqual('Draft', order.Status);
+        Assert.areEqual('cancelled', order.Shopify_Order_Status__c);
+        Assert.areEqual(Datetime.newInstanceGmt(2026, 11, 1, 17, 19, 12), order.Cancelled_At__c);
+        Assert.areEqual('customer', order.Cancel_Reason__c);
+        Assert.areEqual(0, order.Shopify_Total_Price__c);
+        Assert.areEqual(59.97, order.TotalAmount, 'Lines keep the ordered amount');
+        Assert.areEqual(3, order.OrderItems.size());
+    }
+
+    @IsTest
+    static void createsOrderFromUpdateThatArrivesBeforeTheCreate() {
+        upsertOrders(new List<ShopifyOrder>{ fixtureOrder(ShopifyTestData.UPDATED_FULFILLED) });
+
+        Order order = [
+            SELECT Status, Shopify_Order_Status__c, Shopify_Fulfillment_Status__c, TotalAmount, Shopify_Total_Price__c
+            FROM Order
+        ];
+        Assert.areEqual('Draft', order.Status);
+        Assert.areEqual('closed', order.Shopify_Order_Status__c);
+        Assert.areEqual('fulfilled', order.Shopify_Fulfillment_Status__c);
+        Assert.areEqual(34.99, order.Shopify_Total_Price__c);
+        Assert.areEqual(order.Shopify_Total_Price__c, order.TotalAmount);
+    }
+
+    @IsTest
+    static void ignoresVersionOlderThanTheStoredOne() {
+        ShopifyOrder fulfilled = fixtureOrder(ShopifyTestData.UPDATED_FULFILLED);
+        upsertOrders(new List<ShopifyOrder>{ fulfilled });
+
+        Map<String, Order> result = upsertOrders(
+            new List<ShopifyOrder>{
+                ShopifyTestData.order(ShopifyTestData.earlierVersion(ShopifyTestData.UPDATED_FULFILLED))
+            }
+        );
+
+        Order order = [
+            SELECT Id, Shopify_Fulfillment_Status__c, Shopify_Order_Status__c, Shopify_Updated_At__c
+            FROM Order
+        ];
+        Assert.areEqual('fulfilled', order.Shopify_Fulfillment_Status__c);
+        Assert.areEqual('closed', order.Shopify_Order_Status__c);
+        // 2026-11-01T12:01:57-05:00
+        Assert.areEqual(Datetime.newInstanceGmt(2026, 11, 1, 17, 1, 57), order.Shopify_Updated_At__c);
+        Order returned = result.get(fulfilled.shopifyId());
+        Assert.areEqual(order.Id, returned.Id, 'The stored order is returned for an outdated version');
+        Assert.areEqual(order.Shopify_Updated_At__c, returned.Shopify_Updated_At__c);
     }
 
     @IsTest
@@ -248,7 +351,37 @@ private class ShopifyOrderServiceTest {
         Assert.isTrue(queries <= 5, 'SOQL queries: ' + queries);
     }
 
-    private static Map<String, Id> upsertOrders(List<ShopifyOrder> orders) {
+    @IsTest
+    static void updates200OrdersWithConstantDmlAndQueries() {
+        List<ShopifyOrder> created = new List<ShopifyOrder>();
+        List<ShopifyOrder> cancelled = new List<ShopifyOrder>();
+        for (Integer i = 0; i < 200; i++) {
+            created.add(ShopifyTestData.order(ShopifyTestData.orderMap(i)));
+            Map<String, Object> cancellation = ShopifyTestData.orderMap(i);
+            cancellation.put('updated_at', '2026-10-29T09:00:00-04:00');
+            cancellation.put('cancelled_at', '2026-10-29T09:00:00-04:00');
+            cancellation.put('cancel_reason', 'inventory');
+            cancelled.add(ShopifyTestData.order(cancellation));
+        }
+        new ShopifyOrderService().upsertOrders(created);
+
+        Test.startTest();
+        new ShopifyOrderService().upsertOrders(cancelled);
+        Integer dmlStatements = Limits.getDmlStatements();
+        Integer queries = Limits.getQueries();
+        Test.stopTest();
+
+        Assert.areEqual(200, [SELECT COUNT() FROM Order WHERE Shopify_Order_Status__c = 'cancelled']);
+        Assert.areEqual(400, [SELECT COUNT() FROM OrderItem], 'Lines are unchanged');
+        Assert.isTrue(dmlStatements <= 3, 'DML statements: ' + dmlStatements);
+        Assert.isTrue(queries <= 5, 'SOQL queries: ' + queries);
+    }
+
+    private static ShopifyOrder fixtureOrder(String fixtureName) {
+        return ShopifyOrder.parse(ShopifyTestData.payload(fixtureName));
+    }
+
+    private static Map<String, Order> upsertOrders(List<ShopifyOrder> orders) {
         return new ShopifyOrderService().upsertOrders(orders);
     }
 }

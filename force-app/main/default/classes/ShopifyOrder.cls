@@ -11,7 +11,11 @@ public class ShopifyOrder {
     public String updated_at;
     public String financial_status;
     public String fulfillment_status;
+    public String closed_at;
+    public String cancelled_at;
+    public String cancel_reason;
     public String total_price;
+    public String current_total_price;
     public Customer customer;
     public Address billing_address;
     public Address shipping_address;
@@ -97,9 +101,44 @@ public class ShopifyOrder {
         return String.isNotBlank(customer?.last_name) ? customer.last_name : customerName();
     }
 
-    // Shopify timestamps carry the shop's UTC offset, e.g. 2026-10-28T12:56:51-04:00
     public Datetime updatedAt() {
-        return updated_at == null ? null : (Datetime) JSON.deserialize('"' + updated_at + '"', Datetime.class);
+        return toDatetime(updated_at);
+    }
+
+    public Datetime cancelledAt() {
+        return toDatetime(cancelled_at);
+    }
+
+    /**
+     * Whether this version is older than the one Salesforce already holds. Shopify does not
+     * guarantee the delivery order of webhooks; a version with the same timestamp is not older.
+     */
+    public Boolean isOlderThan(Datetime syncedUpdatedAt) {
+        Datetime updated = updatedAt();
+        return updated != null && syncedUpdatedAt != null && updated < syncedUpdatedAt;
+    }
+
+    /**
+     * open, closed or cancelled. Shopify closes (archives) an order when it is fulfilled or
+     * cancelled, so a cancelled order is also closed.
+     */
+    public String orderStatus() {
+        if (cancelled_at != null) {
+            return 'cancelled';
+        }
+        return closed_at == null ? 'open' : 'closed';
+    }
+
+    /**
+     * The total after order edits, refunds and cancellations. total_price keeps the checkout amount.
+     */
+    public Decimal currentTotal() {
+        return toAmount(current_total_price ?? total_price);
+    }
+
+    // Shopify timestamps carry the shop's UTC offset, e.g. 2026-10-28T12:56:51-04:00
+    private static Datetime toDatetime(String value) {
+        return value == null ? null : (Datetime) JSON.deserialize('"' + value + '"', Datetime.class);
     }
 
     // The order date as the shop saw it, independent of the running user's time zone
