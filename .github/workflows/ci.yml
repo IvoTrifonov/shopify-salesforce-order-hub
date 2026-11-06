@@ -35,6 +35,51 @@ jobs:
       # sfdx-lwc-jest passes arguments after its own "--" through to Jest
       - run: npm run test:unit -- -- --passWithNoTests
 
+  analyze:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      # The PMD engine (Apex rules) runs on Java
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install Salesforce CLI and Code Analyzer
+        run: |
+          npm install --global @salesforce/cli@2.155.7
+          sf plugins install code-analyzer@5.14.0
+
+      # Fails on severity 1 (Critical) and 2 (High); rule choices are in code-analyzer.yml
+      - name: Run Code Analyzer
+        run: >
+          sf code-analyzer run
+          --config-file code-analyzer.yml
+          --workspace force-app
+          --rule-selector Recommended
+          --severity-threshold 2
+          --view table
+          --output-file code-analyzer-results.json
+          --output-file code-analyzer-results.html
+
+      - name: Analysis summary
+        if: always()
+        run: node .github/scripts/code-analyzer-summary.js code-analyzer-results.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-analyzer-results
+          path: code-analyzer-results.html
+          if-no-files-found: ignore
+
   validate:
     name: Validate deploy + Apex tests
     runs-on: ubuntu-latest

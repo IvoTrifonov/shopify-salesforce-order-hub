@@ -18,6 +18,10 @@ paths:
   classes (e.g. `InvoiceService`), not in handlers.
 - Inbound Shopify data is upserted by Shopify IDs stored in external ID
   fields, so reprocessing the same payload is idempotent.
+- Inbound sync never writes `Order.Status` (Draft/Activated): it belongs to
+  the Salesforce back office, and a change would echo back to Shopify through
+  `Order_Status_Changed__e`. Shopify's state goes in the `Shopify_*` fields
+  (ADR 0005).
 - Code running as the Site guest user only verifies, stores and publishes.
   Anything touching orders or customers runs in the Platform Event subscriber.
 - Picklist values that mirror Shopify use Shopify's own tokens as API names.
@@ -28,6 +32,17 @@ paths:
   run by the integration user needs every object and field it touches,
   standard fields included, in `Order_Hub_Integration`. Use `WITH SYSTEM_MODE`
   / `AccessLevel.SYSTEM_MODE` only with a stated reason.
+
+## Static analysis
+
+- Code Analyzer (`code-analyzer.yml`, Recommended rules) fails CI on High and
+  Critical findings; Moderate and Low are reported only.
+- A rule that does not fit the project is disabled in `code-analyzer.yml`
+  with its reason. An exception for one class is
+  `@SuppressWarnings('PMD.<Rule>')` on that class, with a comment saying why.
+- Do not add `WITH USER_MODE` / `as user` just to satisfy
+  `ApexCRUDViolation`: user mode is the default, and the
+  `ApexMinimumApiVersion` rule keeps classes on API 67.0 or later.
 
 ## Tests
 

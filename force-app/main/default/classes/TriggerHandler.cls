@@ -8,7 +8,10 @@
  *
  * Handlers can be switched off for the rest of the transaction with
  * TriggerHandler.bypass(OrderTriggerHandler.class), e.g. during data loads.
+ *
+ * The event methods are empty on purpose: a handler overrides only the ones it needs.
  */
+@SuppressWarnings('PMD.EmptyStatementBlock')
 public abstract inherited sharing class TriggerHandler {
     private static final Set<String> BYPASSED_HANDLERS = new Set<String>();
 
