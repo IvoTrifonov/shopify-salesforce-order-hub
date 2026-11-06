@@ -28,17 +28,18 @@ Detailed rules live in `.claude/rules/`; follow all of them.
 
 ## Where things live
 
-| Area                               | Files                                                                               |
-| ---------------------------------- | ----------------------------------------------------------------------------------- |
-| Webhook endpoint (Site guest user) | `ShopifyWebhookResource`, `ShopifyWebhookVerifier`                                  |
-| Async processing (Platform Event)  | `Shopify_Webhook__e`, `ShopifyWebhookEventTrigger`, `ShopifyWebhookProcessor`       |
-| Order upsert                       | `ShopifyOrder` (payload DTO), `ShopifyOrderService`                                 |
-| Trigger framework                  | `TriggerHandler`, `OrderTrigger`, `OrderTriggerHandler`                             |
-| Invoicing                          | `InvoiceService`                                                                    |
-| Test data                          | `ShopifyTestData`, static resource `ShopifyOrderCreateFixture`                      |
-| Settings                           | `Shopify_Settings__c` (protected custom setting, holds the webhook secret)          |
-| Permissions                        | `Order_Hub_Admin`, `Order_Hub_Integration`, `Shopify_Webhook_Guest` permission sets |
-| CI/CD                              | `.github/workflows/` (`ci.yml`, `deploy.yml`), `.github/actions/sf-setup`           |
+| Area                               | Files                                                                                          |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Webhook endpoint (Site guest user) | `ShopifyWebhookResource`, `ShopifyWebhookVerifier` (`orders/create`, `orders/updated`)         |
+| Async processing (Platform Event)  | `Shopify_Webhook__e`, `ShopifyWebhookEventTrigger`, `ShopifyWebhookProcessor`                  |
+| Order upsert                       | `ShopifyOrder` (payload DTO), `ShopifyOrderService`                                            |
+| Trigger framework                  | `TriggerHandler`, `OrderTrigger`, `OrderTriggerHandler`                                        |
+| Invoicing                          | `InvoiceService`                                                                               |
+| Test data                          | `ShopifyTestData`, static resources `ShopifyOrderCreateFixture`, `ShopifyOrderUpdated*Fixture` |
+| Settings                           | `Shopify_Settings__c` (protected custom setting, holds the webhook secret)                     |
+| Permissions                        | `Order_Hub_Admin`, `Order_Hub_Integration`, `Shopify_Webhook_Guest` permission sets            |
+| CI/CD                              | `.github/workflows/` (`ci.yml`, `deploy.yml`), `.github/actions/sf-setup`, `.github/scripts/`  |
+| Static analysis                    | `code-analyzer.yml` (Salesforce Code Analyzer; CI fails on High and Critical)                  |
 
 ## Skills
 
@@ -73,4 +74,8 @@ sf project deploy start --source-dir force-app --target-org orderhub --test-leve
 sf project deploy start --source-dir force-app --target-org orderhub --dry-run   # validate only
 sf apex run test --target-org orderhub --test-level RunLocalTests --code-coverage --wait 10
 sf data query --target-org orderhub -q "SELECT Name, Status__c, Error_Message__c FROM Sync_Log__c ORDER BY CreatedDate DESC LIMIT 5"
+npm run analyze   # Code Analyzer with the CI settings; needs Java
 ```
+
+The guard hook blocks `sf code-analyzer` (it has no `--target-org`), so ask
+the user to run `npm run analyze` and paste the result.
