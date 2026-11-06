@@ -24,8 +24,9 @@ through a Salesforce Site. The endpoint only verifies the
 `X-Shopify-Hmac-Sha256` signature, stores the payload in `Sync_Log__c`,
 publishes a `Shopify_Webhook__e` Platform Event and responds immediately.
 The event's subscriber processes the payload outside the Site guest user
-context: it links or creates the customer's Account and Contact by email,
-creates products and price book entries per variant, and upserts the Order
+context: it links or creates the customer's Account and Contact by email (an
+order without an email keeps the customer it was created with), creates
+products and price book entries per variant, and upserts the Order
 and its lines using Shopify IDs as external IDs, making the operation
 idempotent. Shipping is stored as an order line so `Order.TotalAmount`
 matches Shopify's current total (discounts and taxes are not stored on lines
