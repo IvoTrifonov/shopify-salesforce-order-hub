@@ -43,6 +43,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Order.Lines_Out_Of_Sync__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Order.Shopify_Fulfillment_Status__c</field>
         <readable>true</readable>
     </fieldPermissions>

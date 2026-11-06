@@ -12,6 +12,8 @@ public without sharing class ShopifyWebhookProcessor {
     public static final Set<String> HANDLED_TOPICS = new Set<String>{ 'orders/create', 'orders/updated' };
     @TestVisible
     private static final String OUTDATED_MESSAGE = 'Salesforce already holds a newer version of this order.';
+    @TestVisible
+    private static final String LINES_OUT_OF_SYNC_MESSAGE = 'Order lines were not updated because the order is activated; the order is marked Lines Out of Sync.';
 
     public static void process(List<Shopify_Webhook__e> events) {
         Set<Id> logIds = new Set<Id>();
@@ -65,7 +67,12 @@ public without sharing class ShopifyWebhookProcessor {
             Sync_Log__c log = logs.get(logId);
             log.Status__c = outdated ? 'Skipped' : 'Success';
             log.Order__c = stored.Id;
-            log.Error_Message__c = outdated ? OUTDATED_MESSAGE : null;
+            log.Error_Message__c = null;
+            if (outdated) {
+                log.Error_Message__c = OUTDATED_MESSAGE;
+            } else if (stored.Lines_Out_Of_Sync__c) {
+                log.Error_Message__c = LINES_OUT_OF_SYNC_MESSAGE;
+            }
         }
     }
 

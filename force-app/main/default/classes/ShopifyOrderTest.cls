@@ -108,6 +108,21 @@ private class ShopifyOrderTest {
         // 2026-11-01T12:19:12-05:00
         Assert.areEqual(Datetime.newInstanceGmt(2026, 11, 1, 17, 19, 12), order.cancelledAt());
         Assert.areEqual(0, order.currentTotal(), 'Cancelling sets the current total to zero');
+        Assert.areEqual(3, order.line_items.size(), 'Cancelled lines stay in the payload');
+        Assert.areEqual(0, order.line_items[0].currentQuantity());
+    }
+
+    @IsTest
+    static void readsCurrentQuantityAndRemovedShippingLines() {
+        ShopifyOrder order = parse(
+            '{"id": 1, "line_items": [{"id": 2, "quantity": 2, "current_quantity": 0}, {"id": 3, "quantity": 3}],' +
+            ' "shipping_lines": [{"id": 4, "is_removed": true}, {"id": 5}]}'
+        );
+
+        Assert.areEqual(0, order.line_items[0].currentQuantity(), 'A removed line');
+        Assert.areEqual(3, order.line_items[1].currentQuantity(), 'Falls back to quantity');
+        Assert.isTrue(order.shipping_lines[0].isRemoved());
+        Assert.isFalse(order.shipping_lines[1].isRemoved());
     }
 
     @IsTest

@@ -62,13 +62,25 @@ public class ShopifyOrder {
         public String variant_title;
         public String sku;
         public Integer quantity;
+        // After order edits and cancellations; a removed line stays in the payload with 0
+        public Integer current_quantity;
         public String price;
+
+        public Integer currentQuantity() {
+            return current_quantity ?? quantity;
+        }
     }
 
     public class ShippingLine {
         public Long id;
         public String title;
         public String price;
+        // Order edits keep a removed shipping line in the payload
+        public Boolean is_removed;
+
+        public Boolean isRemoved() {
+            return is_removed == true;
+        }
     }
 
     public static ShopifyOrder parse(String payload) {

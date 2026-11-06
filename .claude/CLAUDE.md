@@ -12,8 +12,9 @@ Detailed rules live in `.claude/rules/`; follow all of them.
 
 - Salesforce dev org alias: **`orderhub`**. It is the only org this project
   may touch (enforced by `.claude/hooks/guard-target-org.js`).
-- Shopify: a development store with an `orders/create` webhook pointing at the
-  Salesforce Site endpoint `/shopify/services/apexrest/shopify/webhooks`.
+- Shopify: a development store with `orders/create` and `orders/updated`
+  webhooks pointing at the Salesforce Site endpoint
+  `/shopify/services/apexrest/shopify/webhooks`.
 - Local, untracked details (org username, store URL) are in `local-notes.md`.
 - Webhook processing runs as the API-only Order Hub Integration user. Its
   username is injected into `ShopifyWebhookEventTriggerConfig` at deploy time
@@ -32,7 +33,7 @@ Detailed rules live in `.claude/rules/`; follow all of them.
 | ---------------------------------- | ---------------------------------------------------------------------------------------------- |
 | Webhook endpoint (Site guest user) | `ShopifyWebhookResource`, `ShopifyWebhookVerifier` (`orders/create`, `orders/updated`)         |
 | Async processing (Platform Event)  | `Shopify_Webhook__e`, `ShopifyWebhookEventTrigger`, `ShopifyWebhookProcessor`                  |
-| Order upsert                       | `ShopifyOrder` (payload DTO), `ShopifyOrderService`                                            |
+| Order upsert                       | `ShopifyOrder` (payload DTO), `ShopifyOrderService`, `ShopifyOrderLineSync` (lines, products)  |
 | Trigger framework                  | `TriggerHandler`, `OrderTrigger`, `OrderTriggerHandler`                                        |
 | Invoicing                          | `InvoiceService`                                                                               |
 | Test data                          | `ShopifyTestData`, static resources `ShopifyOrderCreateFixture`, `ShopifyOrderUpdated*Fixture` |

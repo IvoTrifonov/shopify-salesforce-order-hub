@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Lines_Out_Of_Sync__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description
+    >Set by the Shopify sync when the order's lines changed in Shopify (an order edit or cancellation) but could not be updated because the order is activated. Cleared once the lines match Shopify again.</description>
+    <externalId>false</externalId>
+    <inlineHelpText
+    >Shopify changed this order's lines after it was activated, so its order products no longer match Shopify. To update them, set the order back to Draft and replay its latest sync log.</inlineHelpText>
+    <label>Lines Out of Sync</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

@@ -115,6 +115,10 @@
                 <behavior>Readonly</behavior>
                 <field>Cancel_Reason__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Readonly</behavior>
+                <field>Lines_Out_Of_Sync__c</field>
+            </layoutItems>
         </layoutColumns>
         <style>TwoColumnsTopToBottom</style>
     </layoutSections>
