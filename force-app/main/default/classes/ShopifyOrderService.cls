@@ -34,7 +34,7 @@ public without sharing class ShopifyOrderService {
         }
 
         ShopifyOrderLineSync lines = new ShopifyOrderLineSync(orders, storedByShopifyId, pricebookId);
-        Map<String, Contact> contactsByCustomerKey = upsertCustomers(orders);
+        Map<String, Contact> contactsByCustomerKey = upsertCustomers(orders, storedByShopifyId);
         Map<String, Order> ordersByShopifyId = orderHeaders(orders, storedByShopifyId, contactsByCustomerKey);
         lines.markOutOfSync(ordersByShopifyId.values());
         upsert ordersByShopifyId.values() Order.Shopify_Order_Id__c;
@@ -63,7 +63,14 @@ public without sharing class ShopifyOrderService {
         }
         Map<String, Order> storedByShopifyId = new Map<String, Order>();
         for (Order stored : [
-            SELECT Id, StatusCode, Shopify_Order_Id__c, Shopify_Updated_At__c, Lines_Out_Of_Sync__c
+            SELECT
+                Id,
+                StatusCode,
+                AccountId,
+                BillToContactId,
+                Shopify_Order_Id__c,
+                Shopify_Updated_At__c,
+                Lines_Out_Of_Sync__c
             FROM Order
             WHERE Shopify_Order_Id__c IN :shopifyIds
         ]) {
@@ -72,21 +79,29 @@ public without sharing class ShopifyOrderService {
         return storedByShopifyId;
     }
 
-    // Customers are matched by email; orders without one get their own Account and Contact
+    // Customers are matched by email; an order without one gets its own Account and Contact when it is created
     private static String customerKey(ShopifyOrder order) {
         return order.customerEmail() ?? 'order:' + order.shopifyId();
     }
 
-    private Map<String, Contact> upsertCustomers(List<ShopifyOrder> orders) {
+    private Map<String, Contact> upsertCustomers(List<ShopifyOrder> orders, Map<String, Order> storedByShopifyId) {
         Map<String, ShopifyOrder> ordersByCustomerKey = new Map<String, ShopifyOrder>();
+        Map<String, Contact> contactsByCustomerKey = new Map<String, Contact>();
         for (ShopifyOrder order : orders) {
             if (!ordersByCustomerKey.containsKey(customerKey(order))) {
                 ordersByCustomerKey.put(customerKey(order), order);
             }
+            // Without an email there is nothing to match by, so a stored order keeps the customer it has
+            Order stored = storedByShopifyId.get(order.shopifyId());
+            if (order.customerEmail() == null && stored?.BillToContactId != null) {
+                contactsByCustomerKey.put(
+                    customerKey(order),
+                    new Contact(Id = stored.BillToContactId, AccountId = stored.AccountId)
+                );
+            }
         }
 
         // Oldest Contact wins when an email already has duplicates
-        Map<String, Contact> contactsByCustomerKey = new Map<String, Contact>();
         for (Contact existing : [
             SELECT Id, AccountId, Email
             FROM Contact

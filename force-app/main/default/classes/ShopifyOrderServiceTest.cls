@@ -229,6 +229,27 @@ private class ShopifyOrderServiceTest {
         Assert.areEqual('Doe', order.BillToContact.LastName);
     }
 
+    // Like a draft order created in the Shopify admin without a customer
+    @IsTest
+    static void keepsCustomerOfStoredOrderWithoutEmail() {
+        Map<String, Object> noCustomer = ShopifyTestData.orderMap();
+        noCustomer.put('email', '');
+        noCustomer.put('customer', null);
+        upsertOrders(new List<ShopifyOrder>{ ShopifyTestData.order(noCustomer) });
+        Order created = [SELECT AccountId, BillToContactId FROM Order];
+
+        noCustomer.put('updated_at', '2026-10-29T09:00:00-04:00');
+        upsertOrders(new List<ShopifyOrder>{ ShopifyTestData.order(noCustomer) });
+        upsertOrders(new List<ShopifyOrder>{ ShopifyTestData.order(noCustomer) });
+
+        Order order = [SELECT AccountId, BillToContactId, Account.Name FROM Order];
+        Assert.areEqual(created.AccountId, order.AccountId);
+        Assert.areEqual(created.BillToContactId, order.BillToContactId);
+        Assert.areEqual('Shopify Customer ' + ShopifyTestData.FIXTURE_ORDER_ID, order.Account.Name);
+        Assert.areEqual(1, [SELECT COUNT() FROM Account], 'Updates must not create another customer');
+        Assert.areEqual(1, [SELECT COUNT() FROM Contact]);
+    }
+
     @IsTest
     static void mapsLineWithoutVariantToCustomItemProduct() {
         Map<String, Object> custom = ShopifyTestData.orderMap();
