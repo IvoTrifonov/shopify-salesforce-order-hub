@@ -5,7 +5,8 @@
  * The orders/updated fixtures are real deliveries from the dev store:
  * - Fulfilled: order #1005 (paid at checkout) after it was fulfilled, and with it closed
  * - Paid and Edited: order #1006 marked as paid, then edited to quantity 2 (now partially paid)
- * - Cancelled: order #1007 (payment pending) after it was cancelled by the customer
+ * - Cancelled: order #1007 (payment pending) after it was cancelled by the customer; its
+ *   three lines are still in the payload with current_quantity 0
  */
 @IsTest
 public class ShopifyTestData {
@@ -37,7 +38,8 @@ public class ShopifyTestData {
     }
 
     /**
-     * The order of the given fixture as it was before: open, not cancelled and with an earlier updated_at.
+     * The order of the given fixture as it was before: open, not cancelled, all lines at their
+     * ordered quantity and with an earlier updated_at.
      */
     public static Map<String, Object> earlierVersion(String fixtureName) {
         Map<String, Object> order = orderMap(fixtureName);
@@ -47,7 +49,35 @@ public class ShopifyTestData {
         order.put('cancel_reason', null);
         order.put('fulfillment_status', null);
         order.put('current_total_price', order.get('total_price'));
+        for (Object line : (List<Object>) order.get('line_items')) {
+            ((Map<String, Object>) line).put('current_quantity', ((Map<String, Object>) line).get('quantity'));
+        }
         return order;
+    }
+
+    public static Map<String, Object> lineItem(Map<String, Object> order, Integer index) {
+        return (Map<String, Object>) ((List<Object>) order.get('line_items'))[index];
+    }
+
+    public static Map<String, Object> shippingLine(Map<String, Object> order, Integer index) {
+        return (Map<String, Object>) ((List<Object>) order.get('shipping_lines'))[index];
+    }
+
+    /**
+     * Adds a line for another variant, as an order edit that adds a product does: a copy of the
+     * first line with a new line ID, quantity 1 and the given price.
+     */
+    public static Map<String, Object> addLine(Map<String, Object> order, Long lineId, Long variantId, String price) {
+        Map<String, Object> line = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(lineItem(order, 0)));
+        line.put('id', lineId);
+        line.put('variant_id', variantId);
+        line.put('name', 'Added Product');
+        line.put('variant_title', null);
+        line.put('quantity', 1);
+        line.put('current_quantity', 1);
+        line.put('price', price);
+        ((List<Object>) order.get('line_items')).add(line);
+        return line;
     }
 
     public static Map<String, Object> orderMap() {

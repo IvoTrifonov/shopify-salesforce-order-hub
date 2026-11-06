@@ -151,10 +151,67 @@ private class ShopifyWebhookProcessorTest {
         for (Sync_Log__c processed : [SELECT Status__c, Error_Message__c FROM Sync_Log__c]) {
             Assert.areEqual('Success', processed.Status__c, processed.Error_Message__c ?? 'no error message');
         }
-        Order order = [SELECT Shopify_Order_Status__c, Cancel_Reason__c, Cancelled_At__c FROM Order];
+        Order order = [
+            SELECT Shopify_Order_Status__c, Cancel_Reason__c, Cancelled_At__c, (SELECT Id FROM OrderItems)
+            FROM Order
+        ];
         Assert.areEqual('cancelled', order.Shopify_Order_Status__c);
         Assert.areEqual('customer', order.Cancel_Reason__c);
         Assert.isNotNull(order.Cancelled_At__c);
+        Assert.areEqual(0, order.OrderItems.size(), 'Cancelled lines are deleted');
+    }
+
+    @IsTest
+    static void processesOrderEditWithOnlyTheIntegrationPermissionSet() {
+        User integrationUser = ShopifyTestData.restrictedUser('Order_Hub_Integration');
+        Sync_Log__c created = ShopifyTestData.pendingLog(ShopifyTestData.orderPayload());
+        Map<String, Object> edit = ShopifyTestData.orderMap();
+        edit.put('updated_at', '2026-10-29T09:00:00-04:00');
+        ShopifyTestData.lineItem(edit, 0).put('current_quantity', 2);
+        ShopifyTestData.shippingLine(edit, 0).put('is_removed', true);
+        ShopifyTestData.addLine(edit, 46479812369999L, 59824585769041L, '21.00');
+        Sync_Log__c edited = ShopifyTestData.pendingLog(JSON.serialize(edit), 'orders/updated');
+
+        Test.startTest();
+        System.runAs(integrationUser) {
+            for (Sync_Log__c log : new List<Sync_Log__c>{ created, edited }) {
+                ShopifyWebhookProcessor.process(
+                    new List<Shopify_Webhook__e>{
+                        new Shopify_Webhook__e(Sync_Log_Id__c = log.Id, Topic__c = log.Event_Topic__c)
+                    }
+                );
+            }
+        }
+        Test.stopTest();
+
+        for (Sync_Log__c processed : [SELECT Status__c, Error_Message__c FROM Sync_Log__c]) {
+            Assert.areEqual('Success', processed.Status__c, processed.Error_Message__c ?? 'no error message');
+        }
+        Order order = [SELECT TotalAmount, (SELECT Quantity, UnitPrice FROM OrderItems ORDER BY UnitPrice) FROM Order];
+        Assert.areEqual(2, order.OrderItems.size(), 'Shipping line deleted, product added');
+        Assert.areEqual(2, order.OrderItems[0].Quantity);
+        Assert.areEqual(21.00, order.OrderItems[1].UnitPrice);
+        Assert.areEqual(2 * 19.99 + 21.00, order.TotalAmount);
+    }
+
+    @IsTest
+    static void notesInLogWhenLinesOfActivatedOrderCouldNotBeUpdated() {
+        new ShopifyOrderService()
+            .upsertOrders(
+                new List<ShopifyOrder>{ ShopifyOrder.parse(ShopifyTestData.payload(ShopifyTestData.UPDATED_PAID)) }
+            );
+        update new Order(Id = [SELECT Id FROM Order].Id, Status = 'Activated');
+        Sync_Log__c log = ShopifyTestData.pendingLog(
+            ShopifyTestData.payload(ShopifyTestData.UPDATED_EDITED),
+            'orders/updated'
+        );
+
+        deliver(new List<Sync_Log__c>{ log });
+
+        Sync_Log__c processed = [SELECT Status__c, Error_Message__c FROM Sync_Log__c];
+        Assert.areEqual('Success', processed.Status__c, 'The header was updated');
+        Assert.areEqual(ShopifyWebhookProcessor.LINES_OUT_OF_SYNC_MESSAGE, processed.Error_Message__c);
+        Assert.isTrue([SELECT Lines_Out_Of_Sync__c FROM Order].Lines_Out_Of_Sync__c);
     }
 
     private static void deliver(List<Sync_Log__c> logs) {

@@ -65,7 +65,7 @@ private class ShopifyOrderServiceTest {
         Assert.areEqual('Small / green', items[0].Variant_Title__c);
         Assert.areEqual('59824585736273', items[0].Product2.Shopify_Variant_Id__c);
         Assert.areEqual(8.00, items[1].UnitPrice);
-        Assert.areEqual(ShopifyOrderService.SHIPPING_PRODUCT_KEY, items[1].Product2.Shopify_Variant_Id__c);
+        Assert.areEqual(ShopifyOrderLineSync.SHIPPING_PRODUCT_KEY, items[1].Product2.Shopify_Variant_Id__c);
         Assert.areEqual('Shipping: Standard', items[1].Description);
     }
 
@@ -116,6 +116,7 @@ private class ShopifyOrderServiceTest {
                 Shopify_Order_Status__c,
                 Shopify_Total_Price__c,
                 TotalAmount,
+                Lines_Out_Of_Sync__c,
                 (SELECT Quantity FROM OrderItems)
             FROM Order
         ];
@@ -124,8 +125,9 @@ private class ShopifyOrderServiceTest {
         Assert.areEqual('open', order.Shopify_Order_Status__c);
         Assert.areEqual(149.98, order.Shopify_Total_Price__c);
         Assert.areEqual(1, order.OrderItems.size());
-        Assert.areEqual(1, order.OrderItems[0].Quantity, 'Order edits are not synced to lines yet');
+        Assert.areEqual(1, order.OrderItems[0].Quantity, 'An activated order locks its lines');
         Assert.areEqual(74.99, order.TotalAmount);
+        Assert.isTrue(order.Lines_Out_Of_Sync__c);
     }
 
     @IsTest
@@ -154,8 +156,8 @@ private class ShopifyOrderServiceTest {
         Assert.areEqual(Datetime.newInstanceGmt(2026, 11, 1, 17, 19, 12), order.Cancelled_At__c);
         Assert.areEqual('customer', order.Cancel_Reason__c);
         Assert.areEqual(0, order.Shopify_Total_Price__c);
-        Assert.areEqual(59.97, order.TotalAmount, 'Lines keep the ordered amount');
-        Assert.areEqual(3, order.OrderItems.size());
+        Assert.areEqual(0, order.OrderItems.size(), 'Cancelled lines are deleted');
+        Assert.areEqual(0, order.TotalAmount);
     }
 
     @IsTest
@@ -239,7 +241,7 @@ private class ShopifyOrderServiceTest {
             [
                 SELECT COUNT()
                 FROM OrderItem
-                WHERE Product2.Shopify_Variant_Id__c = :ShopifyOrderService.CUSTOM_ITEM_PRODUCT_KEY
+                WHERE Product2.Shopify_Variant_Id__c = :ShopifyOrderLineSync.CUSTOM_ITEM_PRODUCT_KEY
             ]
         );
     }
