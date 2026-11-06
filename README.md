@@ -210,13 +210,16 @@ Common commands:
 [GitHub Actions](.github/workflows/) checks every pull request and deploys
 `main` ([ADR 0003](docs/decisions/0003-ci-cd-pipeline.md)):
 
-| Workflow | Trigger                         | What it does                                                                                  |
-| -------- | ------------------------------- | --------------------------------------------------------------------------------------------- |
-| CI       | Pull request to `main`          | Prettier, ESLint and LWC Jest; check-only deployment to the org with all local Apex tests     |
-| Deploy   | Push to `main` (`force-app/**`) | Deploys `force-app` with all local Apex tests; per-class coverage is shown in the job summary |
+| Workflow | Trigger                         | What it does                                                                                                        |
+| -------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| CI       | Pull request to `main`          | Prettier, ESLint and LWC Jest; Salesforce Code Analyzer; check-only deployment to the org with all local Apex tests |
+| Deploy   | Push to `main` (`force-app/**`) | Deploys `force-app` with all local Apex tests; per-class coverage is shown in the job summary                       |
 
 Locally, `npm run prettier:verify`, `npm run lint` and `npm test` run the
-same static checks.
+same static checks. `npm run analyze` runs Code Analyzer with the CI settings
+from [`code-analyzer.yml`](code-analyzer.yml); it needs Java 11 or later and
+the plugin (`sf plugins install code-analyzer`). In Windows PowerShell 5.1,
+pass extra flags as `npm run analyze '--' --output-file results.html`.
 
 ## License
 

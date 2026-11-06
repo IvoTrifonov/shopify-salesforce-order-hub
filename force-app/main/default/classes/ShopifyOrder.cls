@@ -2,7 +2,10 @@
  * The parts of a Shopify order webhook payload that the integration uses.
  * Property names mirror Shopify's JSON keys; unknown keys are ignored.
  * See https://shopify.dev/docs/api/admin-rest/latest/resources/order
+ *
+ * The snake_case fields and their number follow from the payload, which JSON.deserialize maps by name.
  */
+@SuppressWarnings('PMD.FieldNamingConventions, PMD.TooManyFields, PMD.ExcessivePublicCount')
 public class ShopifyOrder {
     public Long id;
     public String name;

@@ -5,6 +5,7 @@
   "description": "Salesforce App",
   "scripts": {
     "lint": "eslint --no-error-on-unmatched-pattern \"**/{aura,lwc}/**/*.js\"",
+    "analyze": "sf code-analyzer run --config-file code-analyzer.yml --workspace force-app --rule-selector Recommended --severity-threshold 2 --view table",
     "test": "npm run test:unit",
     "test:unit": "sfdx-lwc-jest",
     "test:unit:watch": "sfdx-lwc-jest --watch",

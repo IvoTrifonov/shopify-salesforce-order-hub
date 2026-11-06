@@ -1,0 +1,29 @@
+# Salesforce Code Analyzer configuration (ADR 0003). CI runs the Recommended rules on force-app
+# and fails on severity 1 (Critical) and 2 (High); everything else is reported only.
+# Rules that do not fit this project are disabled here with the reason. Exceptions for a single
+# class use @SuppressWarnings('PMD.<Rule>') in that class instead.
+
+rules:
+  pmd:
+    # Assumes Apex runs in system mode. Since API 67.0, SOQL and DML run in user mode by default,
+    # and the ApexMinimumApiVersion rule below keeps every class on 67.0 or later.
+    ApexCRUDViolation:
+      disabled: true
+    # We use System.runAs where a restricted user matters (integration and guest user tests),
+    # not in every test class.
+    ApexUnitTestClassShouldHaveRunAs:
+      disabled: true
+    # Convention: clear names instead of comments; comments explain why, not what.
+    ApexDoc:
+      disabled: true
+
+engines:
+  regex:
+    custom_rules:
+      ApexMinimumApiVersion:
+        description: Apex classes and triggers use API 67.0 or later, where SOQL and DML run in user mode by default.
+        violation_message: API versions below 67.0 run SOQL and DML in system mode. Use the sourceApiVersion from sfdx-project.json.
+        regex: /<apiVersion>([0-5]?\d|6[0-6])\.\d+<\/apiVersion>/g
+        file_extensions: ['.cls-meta.xml', '.trigger-meta.xml']
+        severity: 2
+        tags: ['Recommended', 'Security', 'Custom']

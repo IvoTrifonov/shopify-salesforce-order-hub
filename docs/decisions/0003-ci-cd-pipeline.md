@@ -17,8 +17,10 @@ must not expose secrets or org details.
 GitHub Actions runs two workflows:
 
 - **CI** (`ci.yml`, on every pull request to `main`): a `static` job checks
-  Prettier formatting, ESLint and LWC Jest tests without an org. A
-  `validate` job runs `sf project deploy validate` against `orderhub` with
+  Prettier formatting, ESLint and LWC Jest tests without an org. An
+  `analyze` job runs Salesforce Code Analyzer (PMD, ESLint, Regex, Flow and
+  RetireJS engines, `Recommended` rules) on `force-app` and fails on
+  severity 1 (Critical) and 2 (High). A `validate` job runs `sf project deploy validate` against `orderhub` with
   `RunLocalTests`. That is a full check-only deployment: it compiles
   everything and runs all local Apex tests, then rolls back.
 - **Deploy** (`deploy.yml`, on push to `main` that touches `force-app`):
@@ -47,5 +49,13 @@ contains the org's hostname and ID.
   skipped. They still run the `static` job.
 - Salesforce enforces 75% org-wide coverage on deploys with `RunLocalTests`.
   The 90% per-class target is reported in the job summary but not enforced.
+- Code Analyzer rules that do not fit the project are disabled in
+  `code-analyzer.yml`, each with its reason; exceptions for one class use
+  `@SuppressWarnings('PMD.<Rule>')` in that class. `ApexCRUDViolation` is
+  disabled because it assumes system mode, while SOQL and DML run in user
+  mode by default since API 67.0. A custom Regex rule
+  (`ApexMinimumApiVersion`, High) keeps every class and trigger on 67.0 or
+  later, so that default holds. Moderate and Low findings are reported in
+  the job summary and the HTML report artifact but do not fail the build.
 - All files are formatted by Prettier and use LF line endings
   (`.gitattributes`); the pre-commit hook formats staged files.

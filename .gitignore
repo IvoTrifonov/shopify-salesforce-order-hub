@@ -52,3 +52,6 @@ local-notes.md
 # Claude Code personal settings
 .claude/settings.local.json
 .claude/learned-topics.md
+
+# Code Analyzer results (CI uploads them as an artifact)
+code-analyzer-results.*
